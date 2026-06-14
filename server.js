@@ -24,24 +24,21 @@ app.get('/clicker', (req, res) => {
         return res.send("go_to_folder=/1");
     }
 
-    // --- מצב 3: הגנה מפני הצבעה כפולה ---
+    // --- מצב 3: הקשה נוספת (הצבעה כפולה / חסום) ---
     if (votedUsers.has(userPhone)) {
-        console.log(`[חסום] ${userPhone} כבר הצביע בשאלה הנוכחית.`);
-        // מחזיר אותו ישר להמתנה הארוכה (3600 שניות = שעה) עם מוזיקת ברירת המחדל
-        return res.send("music_on_hold=default,3600"); 
+        console.log(`[חסום] ${userPhone} ניסה להצביע שוב. נשלחה הודעת שגיאה.`);
+        // משמיע "הקשה לא תקפה" (או הודעת טקסט שהמערכת מקריאה) ומעביר אותו לשלוחה 2 (המתנה)
+        return res.send("id_list_message=t-הקשה_לא_תקפה\r\ngo_to_folder=/2"); 
     }
 
-    // --- מצב 4: קליטת הצבעה מוצלחת ---
+    // --- מצב 4: הקשה ראשונה (הצבעה מוצלחת!) ---
     votedUsers.add(userPhone); 
     console.log(`[הצבעה נקלטה] שאלה ${currentQuestionId} | טלפון: ${userPhone} | תשובה: ${userChoice}`);
     
-    // הפתרון המדויק לפי ה-PDF שלך:
-    // 1. משמיע את הודעת ה-"נקלט"
-    // 2. מפעיל את מוזיקת ברירת המחדל (default) למשך שעה שלמה (3600 שניות) כדי שלא יתנתק ולא יברח לשום מקום!
-    const responseText = "id_list_message=t-נקלט\r\nmusic_on_hold=Quiet,3600";
-    return res.send(responseText); 
+    // משמיע "נקלט" ומעביר אותו מיד לשלוחה 2 (המתנה)
+    return res.send("id_list_message=t-נקלט\r\ngo_to_folder=/2"); 
 });
 
 app.listen(process.env.PORT || 3000, () => {
-    console.log("השרת מעודכן עם הגדרות מוזיקה תקניות לפי ה-PDF!");
+    console.log("השרת מעודכן עם פיצול הודעות ומעבר לשלוחת המתנה!");
 });
