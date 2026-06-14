@@ -10,12 +10,14 @@ app.get('/clicker', (req, res) => {
     const rawChoice = req.query.user_ans; 
     const userPhone = req.query.ApiPhone;
 
-    if (!rawChoice) {
+    // הגנה קריטית: אם הקלט ריק או לא קיים, מחזירים תגובה תקינה ולא קורסים
+    if (rawChoice === undefined || rawChoice === null) {
         return res.send("go_to_folder=/1");
     }
 
-    // פירוק השרשור ולקיחת הספרה האחרונה בלבד
-    const choiceArray = rawChoice.split(',');
+    // התיקון לבאג: הופכים את זה לטקסט בצורה מפורשת (String) כדי ש-split בחיים לא ייכשל!
+    const cleanString = String(rawChoice);
+    const choiceArray = cleanString.split(',');
     const userChoice = choiceArray[choiceArray.length - 1].trim(); 
 
     // 1. קוד מנחה - מעבר שאלה (הקשת 9)
@@ -23,30 +25,24 @@ app.get('/clicker', (req, res) => {
         currentQuestionId++; 
         votedUsers.clear(); 
         console.log(`[מנחה] המנחה עבר לשאלה מספר: ${currentQuestionId}! הרשימה אופסה.`);
-        
-        // כשהמנחה מאפס, אנחנו חייבים להחזיר את כולם פיזית להתחלה של השלוחה (לאפס את ה-API)
-        // הדרך לעשות זאת במודול API היא לשלוח פקודה נקייה ללא פרמטרים, או פשוט go_to_folder לשלוחה אחרת וחזרה.
-        // בשלב זה פשוט נחזיר אישור, והמנחה יאפס את הסבב.
         return res.send("go_to_folder=/1");
     }
 
     // 2. הגנה מפני הצבעה כפולה (רמאות)
     if (votedUsers.has(userPhone)) {
         console.log(`[חסום] ${userPhone} ניסה להצביע שוב (הקיש: ${userChoice}) ונחסם.`);
-        
-        // השרת לא שומר את הנתון, ומחזיר תשובה רגילה. ה-INI כבר ייקח אותו ל-002 וינעל אותו שם!
+        // השרת מחזיר תגובה חוקית ותקינה - ה-INI כבר ינווט אותו ל-002 וינעל אותו שם
         return res.send("go_to_folder=/1");
     }
 
     // 3. קליטת הצבעה פעם ראשונה (הצלחה)
-    if (userChoice) {
+    if (userChoice && userChoice !== "") {
         votedUsers.add(userPhone); 
         console.log(`[הצבעה נקלטה] שאלה ${currentQuestionId} | טלפון: ${userPhone} | תשובה: ${userChoice}`);
-        
-        // שומרים את ההצבעה ומחזירים אישור. ה-INI יעביר אותו ל-001 להשמעת הביפ
         return res.send("go_to_folder=/1");
     }
 
+    // לכל מקרה אחר שלא תהיה תגובה ריקה
     res.send("go_to_folder=/1");
 });
 
