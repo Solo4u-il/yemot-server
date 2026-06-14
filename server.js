@@ -10,12 +10,11 @@ app.get('/clicker', (req, res) => {
     const rawChoice = req.query.user_ans; 
     const userPhone = req.query.ApiPhone;
 
-    // הגנה קריטית: אם הקלט ריק או לא קיים, מחזירים תגובה תקינה ולא קורסים
     if (rawChoice === undefined || rawChoice === null) {
         return res.send("go_to_folder=/1");
     }
 
-    // התיקון לבאג: הופכים את זה לטקסט בצורה מפורשת (String) כדי ש-split בחיים לא ייכשל!
+    // הגנה לבידוד הספרה הנוכחית שהוקשה ברגע זה
     const cleanString = String(rawChoice);
     const choiceArray = cleanString.split(',');
     const userChoice = choiceArray[choiceArray.length - 1].trim(); 
@@ -28,10 +27,10 @@ app.get('/clicker', (req, res) => {
         return res.send("go_to_folder=/1");
     }
 
-    // 2. הגנה מפני הצבעה כפולה (רמאות)
+    // 2. הגנה מפני הצבעה כפולה (רמאות) - תופס מההקשה השנייה והלאה
     if (votedUsers.has(userPhone)) {
         console.log(`[חסום] ${userPhone} ניסה להצביע שוב (הקיש: ${userChoice}) ונחסם.`);
-        // השרת מחזיר תגובה חוקית ותקינה - ה-INI כבר ינווט אותו ל-002 וינעל אותו שם
+        // מחזיר פקודה תקינה, ה-INI של 002 ינעל אותו שם בשקט
         return res.send("go_to_folder=/1");
     }
 
@@ -42,7 +41,6 @@ app.get('/clicker', (req, res) => {
         return res.send("go_to_folder=/1");
     }
 
-    // לכל מקרה אחר שלא תהיה תגובה ריקה
     res.send("go_to_folder=/1");
 });
 
