@@ -15,6 +15,8 @@ app.get('/clicker', (req, res) => {
         currentQuestionId++; 
         votedUsers.clear(); 
         console.log(`[מנחה] המנחה עבר לשאלה מספר: ${currentQuestionId}! הרשימה אופסה.`);
+        
+        // מעבר שלוחה אמיתי שמאתחל את הכל ומפעיל מחדש את קובץ 000 לכולם
         return res.send("go_to_folder=/1");
     }
 
@@ -22,11 +24,9 @@ app.get('/clicker', (req, res) => {
     if (votedUsers.has(userPhone)) {
         console.log(`[חסום] ${userPhone} ניסה להצביע שוב לשאלה ${currentQuestionId} ונחסם.`);
         
-        // הוא כבר הצביע. אנחנו מחזירים אותו לשלוחה 1.
-        // כדי שהוא לא ישמע את השאלה 000 מחדש בלולאה, אנחנו משתמשים בטריק של ה-PDF:
-        // נותנים לו פקודה לעבור לשלוחה 1, ומכיוון שהדפדפן/מערכת זוכרת את ה-URL,
-        // המערכת פשוט תחזיר אותו להמתנה. ליתר ביטחון, נשלח אותו ישירות ל-go_to_folder.
-        return res.send("go_to_folder=/1");
+        // משתמש שכבר הצביע: אנחנו מחזירים לו "קלט לא תקין".
+        // invalid_file=f-002 אומר למערכת להשמיע קובץ שקט (002) ולהישאר בשלוחה בלי להשמיע את 000!
+        return res.send("invalid_type=global&invalid_file=f-002");
     }
 
     // 3. קליטת הצבעה פעם ראשונה (הצלחה)
@@ -34,9 +34,10 @@ app.get('/clicker', (req, res) => {
         votedUsers.add(userPhone); 
         console.log(`[הצבעה נקלטה] שאלה ${currentQuestionId} | טלפון: ${userPhone} | תשובה: ${userChoice}`);
 
-        // הפורמט הרשמי והיחיד שעובד במודול API לפי ה-PDF בעמוד 23:
-        // קודם מגדירים את ה-id_list להשמעת הביפ (001), ואז משרשרים את ה-go_to_folder חזרה לשלוחה 1
-        return res.send("id_list=f-001&go_to_folder=/1");
+        // הצבעה ראשונה מושמעת בהצלחה:
+        // אנחנו בכוונה אומרים למערכת "invalid_type" כדי שהיא תישאר בתוך השלוחה ולא תאתחל אותה,
+        // אבל נותנים לה את invalid_file=f-001 כדי שהיא תפעיל את קובץ 001 (הביפ שלך)!
+        return res.send("invalid_type=global&invalid_file=f-001");
     }
 
     res.send("go_to_folder=/1");
