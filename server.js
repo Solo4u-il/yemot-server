@@ -16,17 +16,16 @@ app.get('/clicker', (req, res) => {
         votedUsers.clear(); 
         console.log(`[מנחה] המנחה עבר לשאלה מספר: ${currentQuestionId}! הרשימה אופסה.`);
         
-        // משתמשים ב-t-000 כי מדובר בקובץ 000.tts
-        return res.send("play_and_get_input=t-000");
+        // המנחה העביר שאלה -> המערכת מקריאה את הטקסט החי ומחכה לקלט
+        return res.send("read=t-אנא הקישו את התשובה שלכם.=");
     }
 
     // 2. הגנה מפני הצבעה כפולה (רמאות)
     if (votedUsers.has(userPhone)) {
         console.log(`[חסום] ${userPhone} ניסה להצביע שוב לשאלה ${currentQuestionId} ונחסם.`);
         
-        // אם יצרת קובץ שקט בשם 002.tts נפעיל אותו. 
-        // אם אין לך קובץ 002, המערכת פשוט תשמיע שקט כברירת מחדל ותמתין לקלט
-        return res.send("play_and_get_input=t-002");
+        // המשתמש כבר ענה! השרת שולח פקודת המתנה שקטה לחלוטין (בלי להקריא כלום) כדי שלא ישמע את השאלה שוב
+        return res.send("read=t-=");
     }
 
     // 3. קליטת הצבעה פעם ראשונה (הצלחה)
@@ -34,12 +33,13 @@ app.get('/clicker', (req, res) => {
         votedUsers.add(userPhone); 
         console.log(`[הצבעה נקלטה] שאלה ${currentQuestionId} | טלפון: ${userPhone} | תשובה: ${userChoice}`);
 
-        // משתמשים ב-t-001 כדי להקריא את קובץ הביפ/אישור 001.tts
-        return res.send("play_and_get_input=t-001");
+        // ההצבעה נקלטה! המערכת מקריאה טקסט קצרצר של "ביפ" או "נקלט" ומחזירה אותו מיד להמתנה שקטה לקלט הבא
+        return res.send("read=t-ביפ.=");
     }
 
-    // כניסה ראשונית של המשתמש לשלוחה בתחילת המשחק (הקראת 000.tts)
-    res.send("play_and_get_input=t-000");
+    // כניסה ראשונית של המשתמש לשלוחה בתחילת המשחק
+    // השרת אומר למערכת להקריא את הטקסט ישירות ולחכות לקלט הראשון
+    res.send("read=t-אנא הקישו את התשובה שלכם.=");
 });
 
 app.listen(process.env.PORT || 3000, () => {
