@@ -5,7 +5,6 @@ let currentQuestionId = 1;
 let votedUsers = new Set(); 
 
 app.get('/clicker', (req, res) => {
-    // חובה להחזיר כותרת של טקסט פשוט כדי שימות המשיח יבינו את התשובה
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
 
     const userChoice = req.query.user_ans; 
@@ -14,31 +13,32 @@ app.get('/clicker', (req, res) => {
     // 1. קוד מנחה - המנחה מקיש 9 בשלוחה 1 כדי לאפס את המשחק לשאלה הבאה
     if (userChoice === "9") {
         currentQuestionId++; 
-        votedUsers.clear(); // מוחק את כל מי שהצביע
+        votedUsers.clear(); // מוחק את כל מי שהצביע - כולם מורשים להצביע מחדש
         console.log(`[מנחה] המנחה עבר לשאלה מספר: ${currentQuestionId}! הרשימה אופסה.`);
-        // מחזיר פקודה למערכת להחזיר את המנחה לשלוחה 1 (להקראת השאלה הבאה)
-        return res.send("play_and_return=go_to_folder=/1");
+        // המנחה נשאר בשלוחה 1 כדי לנהל את השאלה הבאה
+        return res.send("go_to_folder=/1");
     }
 
-    // 2. הגנה מפני הצבעה כפולה (אם מישהו מנסה לחזור ידנית לשלוחה 1)
+    // 2. הגנה מפני הצבעה כפולה (רמאות)
     if (votedUsers.has(userPhone)) {
-        console.log(`[חסום] ${userPhone} כבר הצביע בשאלה הנוכחית.`);
-        // מחזיר פקודה למערכת לשלוח אותו מיד לשלוחה 2
-        return res.send("play_and_return=go_to_folder=/2");
+        console.log(`[חסום] ${userPhone} כבר הצביע בשאלה הנוכחית. נחסם.`);
+        // כאן השרת יכול להחזיר באופן מפורש מעבר לשלוחה 2 ליתר ביטחון
+        return res.send("go_to_folder=/2");
     }
 
-    // 3. קליטת הצבעה רגילה (פעם ראשונה - הצלחה!)
+    // 3. קליטת הצבעה פעם ראשונה (הצלחה!)
     if (userChoice) {
-        votedUsers.add(userPhone); // נועלים את המשתמש שלא יוכל להצביע שוב
+        votedUsers.add(userPhone); // נועלים את המשתמש לשאלה הזו
         console.log(`[הצבעה נקלטה] שאלה ${currentQuestionId} | טלפון: ${userPhone} | תשובה: ${userChoice}`);
-        // השרת רושם את ההצבעה ומפקד על המערכת לעבור מייד לשלוחה 2 (הביפ וההמתנה)
-        return res.send("play_and_return=go_to_folder=/2");
+        
+        // השרת מחזיר תגובה ריקה ותקינה לחלוטין (סטטוס 200 OK). 
+        // ימות המשיח מבינים שהשרת קיבל את המידע, ומיד קופצים ל-api_001 ב-INI שעושה את המעבר בפועל.
+        return res.send(""); 
     }
 
-    // אם הגיעה פנייה ריקה ללא הקשה
-    return res.send("");
+    res.send("");
 });
 
 app.listen(process.env.PORT || 3000, () => {
-    console.log("השרת מעודכן ומחזיר פקודות ניתוב ישירות למרכזיה!");
+    console.log("השרת פועל ומחכה לאישור הנתונים משלוחה 1!");
 });
