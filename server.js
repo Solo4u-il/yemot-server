@@ -5,7 +5,7 @@ let currentQuestionId = 1;
 let votedUsers = new Set(); 
 
 app.get('/clicker', (req, res) => {
-    // הגדרת השרת לשליחת טקסט נקי בלבד, כדי שימות המשיח יקראו את ה-go_to_folder בדיוק כמו שהוא
+    // הגדרת השרת לשליחת טקסט נקי בלבד, ללא תוספות קוד שישבשו את ימות המשיח
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
 
     const userChoice = req.query.user_ans;
@@ -17,15 +17,15 @@ app.get('/clicker', (req, res) => {
         votedUsers.clear(); 
         console.log(`[מנחה] המנחה עבר לשאלה מספר: ${currentQuestionId}! הרשימה אופסה.`);
         
-        // השמעת קובץ 001 (או דילוג) וחזרה לשלוחה 1 מחדש
-        return res.send("id_list=f-001&go_to_folder=/1");
+        // החזרה נקייה לשלוחה 1 מחדש
+        return res.send("go_to_folder=/1");
     }
 
     // 2. הגנה מפני הצבעה כפולה
     if (votedUsers.has(userPhone)) {
         console.log(`[חסום] ${userPhone} ניסה להצביע שוב לשאלה ${currentQuestionId} ונחסם.`);
         
-        // מחזירים אותו לשלוחה 1 בשקט מוחלט בלי להשמיע כלום
+        // מחזירים אותו לשלוחה 1 בשקט מוחלט
         return res.send("go_to_folder=/1");
     }
 
@@ -34,8 +34,8 @@ app.get('/clicker', (req, res) => {
         votedUsers.add(userPhone); 
         console.log(`[הצבעה נקלטה] שאלה ${currentQuestionId} | טלפון: ${userPhone} | תשובה: ${userChoice}`);
 
-        // משמיעים את קובץ 001 (הביפ) ומבצעים את פקודת הניתוב שביקשת
-        return res.send("id_list=f-001&go_to_folder=/1");
+        // מחזירים את המשתמש לשלוחה 1 בצורה חלקה ויציבה
+        return res.send("go_to_folder=/1");
     }
 
     // כניסה ראשונית לשלוחה
