@@ -8,32 +8,36 @@ app.get('/clicker', (req, res) => {
     const userChoice = req.query.user_ans;
     const userPhone = req.query.ApiPhone;
 
-    // קוד בדיקה למעבר שאלה (הקשת 9)
+    // 1. קוד בדיקה למעבר שאלה (הקשת 9)
     if (userChoice === "9") {
         currentQuestionId++; 
         votedUsers.clear(); 
         console.log(`[מנחה] המנחה עבר לשאלה מספר: ${currentQuestionId}! הרשימה אופסה.`);
-        return res.send("id_list=t-החלפת שאלה.&go_to_folder=/1");
+        
+        // משמיעים הודעה קולית קצרה ומחזירים לשלוחה 1 מחדש (הפעם ישמעו את 000 כי הרשימה אופסה)
+        return res.send("id_list=t-החלפת שאלה.&תחזיר=go_to_folder&API_go_to_folder=/1");
     }
 
-    // 1. הגנה מפני הצבעה כפולה
+    // 2. הגנה מפני הצבעה כפולה
     if (votedUsers.has(userPhone)) {
         console.log(`[חסום] ${userPhone} ניסה להצביע שוב לשאלה ${currentQuestionId} ונחסם.`);
-        // מחזירים אותו לשלוחה בשקט מוחלט בלי להשמיע כלום
-        return res.send("go_to_folder=/1");
+        
+        // המשתמש כבר הצביע. כדי שלא ישמע שוב את 000, אנחנו מחזירים אותו לשלוחה 1, 
+        // אבל מכיוון שימות המשיח זוכרים שהוא כבר ענה על api_000, הוא פשוט יישאר בהמתנה שקטה.
+        return res.send("תחזיר=go_to_folder&API_go_to_folder=/1");
     }
 
-    // 2. קליטת הצבעה פעם ראשונה
+    // 3. קליטת הצבעה פעם ראשונה (הצלחה)
     if (userChoice) {
         votedUsers.add(userPhone); 
         console.log(`[הצבעה נקלטה] שאלה ${currentQuestionId} | טלפון: ${userPhone} | תשובה: ${userChoice}`);
 
-        // כאן הקסם: השרת משמיע את קובץ 001 (הביפ) ומחזיר את המשתמש מיד לשלוחה 1 בלולאה!
-        return res.send("id_list=f-001&go_to_folder=/1");
+        // מפעילים את קובץ 001 (הביפ) ומחזירים מיד לשלוחה 1 להמתנה
+        return res.send("id_list=f-001&תחזיר=go_to_folder&API_go_to_folder=/1");
     }
 
-    // כניסה ראשונית או איפוס
-    res.send("go_to_folder=/1");
+    // כניסה ראשונית לשלוחה
+    res.send("תחזיר=go_to_folder&API_go_to_folder=/1");
 });
 
 app.listen(process.env.PORT || 3000, () => {
