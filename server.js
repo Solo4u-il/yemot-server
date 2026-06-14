@@ -8,44 +8,32 @@ app.get('/clicker', (req, res) => {
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
 
     const userChoice = req.query.user_ans; 
-    const userPhone = req.query.ApiPhone;
+    const userPhone = req.query.ApiPhone; 
 
-    // הגנה למקרה שהגיע קלט ריק - מחזיר לתחילת השלוחה בשקט
-    if (!userChoice) {
-        return res.send("go_to_folder=/1&api_index=000");
-    }
-
-    // 1. קוד מנחה - מעבר שאלה (הקשת 9)
+    // 1. קוד מנחה - המנחה מקיש 9 בשלוחה 1 כדי לאפס את המשחק לשאלה הבאה
     if (userChoice === "9") {
         currentQuestionId++; 
-        votedUsers.clear(); // מאפס את רשימת המצביעים - כולם יכולים להצביע מחדש
+        votedUsers.clear(); // מוחק את כל מי שהצביע - כולם מורשים להצביע מחדש בשאלה החדשה
         console.log(`[מנחה] המנחה עבר לשאלה מספר: ${currentQuestionId}! הרשימה אופסה.`);
-        
-        // המנחה העביר שאלה -> מחזירים את כולם פיזית לקובץ 000 כדי לשמוע את השאלה החדשה ולהצביע
-        return res.send("go_to_folder=/1&api_index=000");
+        return res.send("go_to_folder=/1");
     }
 
-    // 2. הגנה מפני הצבעה כפולה (רמאות)
+    // 2. הגנה מפני הצבעה כפולה (אם מישהו מנסה לרמות או לחזור לשלוחה 1)
     if (votedUsers.has(userPhone)) {
-        console.log(`[חסום] ${userPhone} ניסה להצביע שוב לשאלה ${currentQuestionId} ונחסם.`);
-        
-        // המשתמש כבר הצביע! השרת מתעלם ומחזיר אותו להמתנה שקטה בשלוחה בלי להשמיע כלום
-        return res.send("go_to_folder=/1");
+        console.log(`[חסום] ${userPhone} כבר הצביע בשאלה הנוכחית. מועבר חזרה להמתנה.`);
+        return res.send("go_to_folder=/2");
     }
 
-    // 3. קליטת הצבעה פעם ראשונה (הצלחה)
+    // 3. קליטת הצבעה רגילה (פעם ראשונה - הצלחה!)
     if (userChoice) {
-        votedUsers.add(userPhone); 
+        votedUsers.add(userPhone); // נועלים את המשתמש שלא יוכל להצביע שוב בשאלה הזו
         console.log(`[הצבעה נקלטה] שאלה ${currentQuestionId} | טלפון: ${userPhone} | תשובה: ${userChoice}`);
-        
-        // ההצבעה נקלטה! השרת מאשר, וימות המשיח אוטומטית יעברו לפי ה-INI לקובץ 001 (הביפ)
-        // ישמיעו אותו בלי אפשרות להקיש, וייכנסו להמתנה שקטה לחלוטין בלי "לא הוקשה בחירה".
-        return res.send("go_to_folder=/1");
+        return res.send(""); // מחזיר תגובה ריקה ומאושרת. ה-INI יזרוק אותו מיד לשלוחה 2
     }
 
-    res.send("go_to_folder=/1&api_index=000");
+    res.send("");
 });
 
 app.listen(process.env.PORT || 3000, () => {
-    console.log("Server is running!");
+    console.log("השרת פועל ומסונכרן באופן מושלם עם ימות המשיח!");
 });
