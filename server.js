@@ -11,10 +11,10 @@ app.get('/clicker', (req, res) => {
     const userPhone = req.query.ApiPhone;
 
     if (!rawChoice) {
-        return res.send("go_to_folder=/1&api_index=000");
+        return res.send("go_to_folder=/1");
     }
 
-    // לוקחים רק את הספרה האחרונה שהוקשה
+    // פירוק השרשור ולקיחת הספרה האחרונה בלבד
     const choiceArray = rawChoice.split(',');
     const userChoice = choiceArray[choiceArray.length - 1].trim(); 
 
@@ -24,17 +24,18 @@ app.get('/clicker', (req, res) => {
         votedUsers.clear(); 
         console.log(`[מנחה] המנחה עבר לשאלה מספר: ${currentQuestionId}! הרשימה אופסה.`);
         
-        // רק כשהמנחה מאפס, כולם חוזרים לשמוע את השאלה 000 מהתחלה
-        return res.send("go_to_folder=/1&api_index=000");
+        // כשהמנחה מאפס, אנחנו חייבים להחזיר את כולם פיזית להתחלה של השלוחה (לאפס את ה-API)
+        // הדרך לעשות זאת במודול API היא לשלוח פקודה נקייה ללא פרמטרים, או פשוט go_to_folder לשלוחה אחרת וחזרה.
+        // בשלב זה פשוט נחזיר אישור, והמנחה יאפס את הסבב.
+        return res.send("go_to_folder=/1");
     }
 
-    // 2. הגנה מפני הצבעה כפולה (רמאות) - תופס מההקשה השנייה והלאה
+    // 2. הגנה מפני הצבעה כפולה (רמאות)
     if (votedUsers.has(userPhone)) {
         console.log(`[חסום] ${userPhone} ניסה להצביע שוב (הקיש: ${userChoice}) ונחסם.`);
         
-        // כאן השבירה של הלולאה! אנחנו מחזירים אותו קבוע ל-002. 
-        // הוא בחיים לא יחזור ל-000, אלא יישאר תקוע בלולאה שקטה בתוך 002.
-        return res.send("go_to_folder=/1&api_index=002");
+        // השרת לא שומר את הנתון, ומחזיר תשובה רגילה. ה-INI כבר ייקח אותו ל-002 וינעל אותו שם!
+        return res.send("go_to_folder=/1");
     }
 
     // 3. קליטת הצבעה פעם ראשונה (הצלחה)
@@ -42,11 +43,11 @@ app.get('/clicker', (req, res) => {
         votedUsers.add(userPhone); 
         console.log(`[הצבעה נקלטה] שאלה ${currentQuestionId} | טלפון: ${userPhone} | תשובה: ${userChoice}`);
         
-        // פעם ראשונה שלחנו אותו ל-001 (כדי שישמע את הביפ)
-        return res.send("go_to_folder=/1&api_index=001");
+        // שומרים את ההצבעה ומחזירים אישור. ה-INI יעביר אותו ל-001 להשמעת הביפ
+        return res.send("go_to_folder=/1");
     }
 
-    res.send("go_to_folder=/1&api_index=000");
+    res.send("go_to_folder=/1");
 });
 
 app.listen(process.env.PORT || 3000, () => {
