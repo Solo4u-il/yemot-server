@@ -5,6 +5,9 @@ let currentQuestionId = 1;
 let votedUsers = new Set(); 
 
 app.get('/clicker', (req, res) => {
+    // הגדרת השרת לשליחת טקסט נקי בלבד, כדי שימות המשיח יקראו את ה-go_to_folder בדיוק כמו שהוא
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+
     const userChoice = req.query.user_ans;
     const userPhone = req.query.ApiPhone;
 
@@ -14,16 +17,16 @@ app.get('/clicker', (req, res) => {
         votedUsers.clear(); 
         console.log(`[מנחה] המנחה עבר לשאלה מספר: ${currentQuestionId}! הרשימה אופסה.`);
         
-        // מעבירים אנגלית נקייה: הפניה לשלוחה 1 מחדש (שם ישמעו שוב את 000)
-        return res.send("response=go_to_folder&API_go_to_folder=/1");
+        // השמעת קובץ 001 (או דילוג) וחזרה לשלוחה 1 מחדש
+        return res.send("id_list=f-001&go_to_folder=/1");
     }
 
     // 2. הגנה מפני הצבעה כפולה
     if (votedUsers.has(userPhone)) {
         console.log(`[חסום] ${userPhone} ניסה להצביע שוב לשאלה ${currentQuestionId} ונחסם.`);
         
-        // מחזירים אותו לשלוחה 1 בשקט מוחלט (באנגלית)
-        return res.send("response=go_to_folder&API_go_to_folder=/1");
+        // מחזירים אותו לשלוחה 1 בשקט מוחלט בלי להשמיע כלום
+        return res.send("go_to_folder=/1");
     }
 
     // 3. קליטת הצבעה פעם ראשונה (הצלחה)
@@ -31,12 +34,12 @@ app.get('/clicker', (req, res) => {
         votedUsers.add(userPhone); 
         console.log(`[הצבעה נקלטה] שאלה ${currentQuestionId} | טלפון: ${userPhone} | תשובה: ${userChoice}`);
 
-        // משמיעים את קובץ 001 (הביפ) ומעבירים חזרה לשלוחה 1 (באוניברסלית - בלי עברית בכלל!)
-        return res.send("id_list=f-001&response=go_to_folder&API_go_to_folder=/1");
+        // משמיעים את קובץ 001 (הביפ) ומבצעים את פקודת הניתוב שביקשת
+        return res.send("id_list=f-001&go_to_folder=/1");
     }
 
     // כניסה ראשונית לשלוחה
-    res.send("response=go_to_folder&API_go_to_folder=/1");
+    res.send("go_to_folder=/1");
 });
 
 app.listen(process.env.PORT || 3000, () => {
