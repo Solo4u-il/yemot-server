@@ -5,19 +5,18 @@ let currentQuestionId = 1;
 let votedUsers = new Set(); 
 
 app.get('/clicker', (req, res) => {
-    // הגדרת השרת לשליחת טקסט נקי בלבד, ללא תוספות קוד שישבשו את ימות המשיח
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
 
     const userChoice = req.query.user_ans;
     const userPhone = req.query.ApiPhone;
 
-    // 1. קוד בדיקה למעבר שאלה (הקשת 9)
+    // 1. קוד בדיקה למעבר שאלה (הקשת 9) - רק פה מאתחלים את השלוחה כדי שכולם ישמעו את 000 מחדש!
     if (userChoice === "9") {
         currentQuestionId++; 
         votedUsers.clear(); 
         console.log(`[מנחה] המנחה עבר לשאלה מספר: ${currentQuestionId}! הרשימה אופסה.`);
         
-        // החזרה נקייה לשלוחה 1 מחדש
+        // אומרים למערכת לעבור מחדש לשלוחה 1 כדי להשמיע את קובץ 000 לשאלה החדשה
         return res.send("go_to_folder=/1");
     }
 
@@ -25,8 +24,8 @@ app.get('/clicker', (req, res) => {
     if (votedUsers.has(userPhone)) {
         console.log(`[חסום] ${userPhone} ניסה להצביע שוב לשאלה ${currentQuestionId} ונחסם.`);
         
-        // מחזירים אותו לשלוחה 1 בשקט מוחלט
-        return res.send("go_to_folder=/1");
+        // לא שולחים go_to_folder! מחזירים תשובה ריקה/שקטה כדי שימות המשיח יישארו בהמתנה בלי להשמיע כלום
+        return res.send("");
     }
 
     // 3. קליטת הצבעה פעם ראשונה (הצלחה)
@@ -34,12 +33,12 @@ app.get('/clicker', (req, res) => {
         votedUsers.add(userPhone); 
         console.log(`[הצבעה נקלטה] שאלה ${currentQuestionId} | טלפון: ${userPhone} | תשובה: ${userChoice}`);
 
-        // מחזירים את המשתמש לשלוחה 1 בצורה חלקה ויציבה
-        return res.send("go_to_folder=/1");
+        // משמיעים למשתמש את קובץ 001 (הביפ) כחיווי, ולא מעבירים תיקייה כדי שלא ישמע את 000 מחדש!
+        return res.send("id_list=f-001");
     }
 
-    // כניסה ראשונית לשלוחה
-    res.send("go_to_folder=/1");
+    // כניסה ראשונית של המשתמש לשלוחה בתחילת המשחק (השמעת השאלה 000)
+    res.send("");
 });
 
 app.listen(process.env.PORT || 3000, () => {
