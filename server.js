@@ -7,8 +7,17 @@ let votedUsers = new Set();
 app.get('/clicker', (req, res) => {
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
 
-    const userChoice = req.query.user_ans;
+    const rawChoice = req.query.user_ans; // יכול להגיע כ-"1" או כ-"1,2" או כ-"1,2,2"
     const userPhone = req.query.ApiPhone;
+
+    // הגנה למקרה שאין קלט בכלל
+    if (!rawChoice) {
+        return res.send("go_to_folder=/1&api_index=000");
+    }
+
+    // הפתרון: לוקחים רק את הספרה האחרונה שהוקשה ברצף!
+    const choiceArray = rawChoice.split(',');
+    const userChoice = choiceArray[choiceArray.length - 1].trim(); 
 
     // 1. קוד בדיקה למעבר שאלה (הקשת 9)
     if (userChoice === "9") {
@@ -16,28 +25,28 @@ app.get('/clicker', (req, res) => {
         votedUsers.clear(); 
         console.log(`[מנחה] המנחה עבר לשאלה מספר: ${currentQuestionId}! הרשימה אופסה.`);
         
-        // חוזרים להתחלה, לקובץ 000
+        // מאתחלים לחלוטין את השלוחה כדי להתחיל רצף חדש לגמרי בשאלה החדשה
         return res.send("go_to_folder=/1");
     }
 
     // 2. הגנה מפני הצבעה כפולה (רמאות)
     if (votedUsers.has(userPhone)) {
-        console.log(`[חסום] ${userPhone} ניסה להצביע שוב ונחסם.`);
+        console.log(`[חסום] ${userPhone} ניסה להצביע שוב (הקיש: ${userChoice}) לשאלה ${currentQuestionId} ונחסם.`);
         
-        // המשתמש כבר הצביע! אנחנו מעבירים אותו לשלוחה 1, אבל פוקדים על המערכת להפעיל את קובץ api_002 (השקט)
+        // המשתמש כבר הצביע בעבר. אנחנו מחזירים אותו ל-002 (השקט) כדי שלא ישמע את השאלה מחדש
         return res.send("go_to_folder=/1&api_index=002");
     }
 
     // 3. קליטת הצבעה פעם ראשונה (הצלחה)
     if (userChoice) {
-        votedUsers.add(userPhone); 
+        votedUsers.add(userPhone); // שומרים את הנייד שלו כדי לחסום אותו בפעם הבאה
         console.log(`[הצבעה נקלטה] שאלה ${currentQuestionId} | טלפון: ${userPhone} | תשובה: ${userChoice}`);
         
-        // ההצבעה נקלטה! אנחנו מעבירים אותו לשלוחה 1, אבל פוקדים על המערכת להפעיל את קובץ api_001 (הביפ)
+        // הצבעה ראשונה נקלטה בהצלחה! שולחים אותו ל-001 (שישמע ביפ) וימשיך ברצף לקלט הבא
         return res.send("go_to_folder=/1&api_index=001");
     }
 
-    res.send("go_to_folder=/1");
+    res.send("go_to_folder=/1&api_index=000");
 });
 
 app.listen(process.env.PORT || 3000, () => {
