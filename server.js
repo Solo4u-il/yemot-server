@@ -16,17 +16,16 @@ app.get('/clicker', (req, res) => {
         votedUsers.clear(); 
         console.log(`[מנחה] המנחה עבר לשאלה מספר: ${currentQuestionId}! הרשימה אופסה.`);
         
-        // מעבר שלוחה אמיתי שמאתחל את הכל ומפעיל מחדש את קובץ 000 לכולם
-        return res.send("go_to_folder=/1");
+        // המנחה העביר שאלה -> משמיעים מחדש את קובץ השאלה 000 ומחכים לקלט
+        return res.send("play_and_get_input=f-000");
     }
 
     // 2. הגנה מפני הצבעה כפולה (רמאות)
     if (votedUsers.has(userPhone)) {
         console.log(`[חסום] ${userPhone} ניסה להצביע שוב לשאלה ${currentQuestionId} ונחסם.`);
         
-        // משתמש שכבר הצביע: אנחנו מחזירים לו "קלט לא תקין".
-        // invalid_file=f-002 אומר למערכת להשמיע קובץ שקט (002) ולהישאר בשלוחה בלי להשמיע את 000!
-        return res.send("invalid_type=global&invalid_file=f-002");
+        // המשתמש כבר ענה! משמיעים לו את קובץ 002 (השקט) ומחכים מיד לקלט הבא בלי לשמוע את השאלה
+        return res.send("play_and_get_input=f-002");
     }
 
     // 3. קליטת הצבעה פעם ראשונה (הצלחה)
@@ -34,13 +33,13 @@ app.get('/clicker', (req, res) => {
         votedUsers.add(userPhone); 
         console.log(`[הצבעה נקלטה] שאלה ${currentQuestionId} | טלפון: ${userPhone} | תשובה: ${userChoice}`);
 
-        // הצבעה ראשונה מושמעת בהצלחה:
-        // אנחנו בכוונה אומרים למערכת "invalid_type" כדי שהיא תישאר בתוך השלוחה ולא תאתחל אותה,
-        // אבל נותנים לה את invalid_file=f-001 כדי שהיא תפעיל את קובץ 001 (הביפ שלך)!
-        return res.send("invalid_type=global&invalid_file=f-001");
+        // ההצבעה נקלטה! משמיעים לו את קובץ 001 (הביפ) ומחכים מיד לקלט הבא (בשקט)
+        return res.send("play_and_get_input=f-001");
     }
 
-    res.send("go_to_folder=/1");
+    // כניסה ראשונית של המשתמש לשלוחה בתחילת המשחק
+    // משמיעים לו את קובץ 000 ומחכים לקלט הראשון שלו
+    res.send("play_and_get_input=f-000");
 });
 
 app.listen(process.env.PORT || 3000, () => {
