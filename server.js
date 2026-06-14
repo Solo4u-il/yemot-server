@@ -2,14 +2,14 @@ const express = require('express');
 const app = express();
 
 app.get('/clicker', (req, res) => {
-    // קליטת ההקשה - תמיכה בכל צורות השליחה של ימות המשיח
-    const userChoice = req.query.ApiData || req.query.Selection_1;
+    // ימות המשיח שולחים את המקש שהוקש בפרמטר ApiGetInput
+    const userChoice = req.query.ApiGetInput;
 
     if (!userChoice) {
-        // פעם ראשונה בשלוחה: משמיעים ועוצרים להקשה ללא אישור סולמית
-        res.send("read=t-מה בירת ישראל? אחת תל אביב, שתיים ירושלים.=1,1,7,no");
+        // פעם ראשונה שהמאזין נכנס - משמיעים לו את השאלה כטקסט רגיל
+        res.send("id_list=t-מה בירת ישראל? אחת תל אביב, שתיים ירושלים.&");
     } else {
-        // המשתמש הקיש - בודקים את התשובה
+        // המאזין הקיש ספרה - השרת בודק ומחזיר תשובה
         if (userChoice === "2") {
             res.send("id_list=t-כל הכבוד! ירושלים היא התשובה הנכונה!&");
         } else {
