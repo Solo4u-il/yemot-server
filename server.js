@@ -14,7 +14,7 @@ app.get('/clicker', (req, res) => {
         votedUsers.clear(); 
         console.log(`[מנחה] המנחה עבר לשאלה מספר: ${currentQuestionId}! הרשימה אופסה.`);
         
-        // משמיעים הודעה קולית קצרה ומחזירים לשלוחה 1 מחדש (הפעם ישמעו את 000 כי הרשימה אופסה)
+        // תיקון לפי עמוד 23: מחזירים פקודת מעבר תיקייה ישירות לשלוחה 1
         return res.send("id_list=t-החלפת שאלה.&תחזיר=go_to_folder&API_go_to_folder=/1");
     }
 
@@ -22,8 +22,7 @@ app.get('/clicker', (req, res) => {
     if (votedUsers.has(userPhone)) {
         console.log(`[חסום] ${userPhone} ניסה להצביע שוב לשאלה ${currentQuestionId} ונחסם.`);
         
-        // המשתמש כבר הצביע. כדי שלא ישמע שוב את 000, אנחנו מחזירים אותו לשלוחה 1, 
-        // אבל מכיוון שימות המשיח זוכרים שהוא כבר ענה על api_000, הוא פשוט יישאר בהמתנה שקטה.
+        // המשתמש כבר הצביע. מחזירים אותו לשלוחה 1 בשקט מוחלט בלי להשמיע כלום
         return res.send("תחזיר=go_to_folder&API_go_to_folder=/1");
     }
 
@@ -32,7 +31,7 @@ app.get('/clicker', (req, res) => {
         votedUsers.add(userPhone); 
         console.log(`[הצבעה נקלטה] שאלה ${currentQuestionId} | טלפון: ${userPhone} | תשובה: ${userChoice}`);
 
-        // מפעילים את קובץ 001 (הביפ) ומחזירים מיד לשלוחה 1 להמתנה
+        // תיקון לפי עמוד 23: משמיעים את קובץ 001 (הביפ) ומעבירים חזרה לשלוחה 1
         return res.send("id_list=f-001&תחזיר=go_to_folder&API_go_to_folder=/1");
     }
 
