@@ -5,10 +5,9 @@ app.get('/clicker', (req, res) => {
     const userChoice = req.query.ApiData;
 
     if (!userChoice) {
-        // המשתמש רק נכנס - נשאל אותו שאלה
-        res.send("read=t-מה בירת ישראל? אחת תל אביב, שתיים ירושלים.=1,1,no,no,no,no");
+        // שימוש בפורמט הרשמי והיציב ביותר לקליטת ספרה אחת
+        res.send("read=t-מה בירת ישראל? אחת תל אביב, שתיים ירושלים.&max=1&min=1&sec_wait=7");
     } else {
-        // המשתמש הקיש תשובה - נחזיר לו הודעה בהתאם
         if (userChoice === "2") {
             res.send("id_list=t-כל הכבוד! ירושלים היא התשובה הנכונה!&");
         } else {
