@@ -15,31 +15,25 @@ app.get('/clicker', (req, res) => {
         currentQuestionId++; 
         votedUsers.clear(); 
         console.log(`[מנחה] המנחה עבר לשאלה מספר: ${currentQuestionId}! הרשימה אופסה.`);
-        
-        // המנחה העביר שאלה -> המערכת מקריאה את הטקסט החי ומחכה לקלט
-        return res.send("read=t-אנא הקישו את התשובה שלכם.=");
+        return res.send("go_to_folder=/1");
     }
 
     // 2. הגנה מפני הצבעה כפולה (רמאות)
     if (votedUsers.has(userPhone)) {
-        console.log(`[חסום] ${userPhone} ניסה להצביע שוב לשאלה ${currentQuestionId} ונחסם.`);
-        
-        // המשתמש כבר ענה! השרת שולח פקודת המתנה שקטה לחלוטין (בלי להקריא כלום) כדי שלא ישמע את השאלה שוב
-        return res.send("read=t-=");
+        console.log(`[חסום] ${userPhone} ניסה להצביע שוב ונחסם.`);
+        // מחזיר אותך לשלוחה 1
+        return res.send("go_to_folder=/1");
     }
 
-    // 3. קליטת הצבעה פעם ראשונה (הצלחה)
+    // 3. קליטת הצבעה פעם ראשונה
     if (userChoice) {
         votedUsers.add(userPhone); 
         console.log(`[הצבעה נקלטה] שאלה ${currentQuestionId} | טלפון: ${userPhone} | תשובה: ${userChoice}`);
-
-        // ההצבעה נקלטה! המערכת מקריאה טקסט קצרצר של "ביפ" או "נקלט" ומחזירה אותו מיד להמתנה שקטה לקלט הבא
-        return res.send("read=t-ביפ.=");
+        // מחזיר אותך לשלוחה 1
+        return res.send("go_to_folder=/1");
     }
 
-    // כניסה ראשונית של המשתמש לשלוחה בתחילת המשחק
-    // השרת אומר למערכת להקריא את הטקסט ישירות ולחכות לקלט הראשון
-    res.send("read=t-אנא הקישו את התשובה שלכם.=");
+    res.send("go_to_folder=/1");
 });
 
 app.listen(process.env.PORT || 3000, () => {
