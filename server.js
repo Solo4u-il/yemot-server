@@ -7,9 +7,9 @@ let votedUsers = new Map(); // שומר באיזו שאלה כל טלפון הצ
 app.get('/clicker', (req, res) => {
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
 
-    const shluha = req.query.shluha;       // המשתנה הסטטי מה-INI
-    const userChoice = req.query.user_ans; // הקלט משלוחה 1 (אם יש)
-    const userPhone = req.query.ApiPhone;   // טלפון המאזין
+    const shluha = req.query.shluha;       
+    const userChoice = req.query.user_ans; 
+    const userPhone = req.query.ApiPhone;   
 
     // ==========================================
     //  מצב א': המאזין נמצא בשלוחה 2 (המתנה אוטומטית)
@@ -17,11 +17,9 @@ app.get('/clicker', (req, res) => {
     if (shluha === "2") {
         const lastVotedQuestion = votedUsers.get(userPhone);
 
-        // אם המאזין כבר הצביע בשאלה הנוכחית, הוא ממשיך להמתין בשלוחה 2
         if (lastVotedQuestion === currentQuestionId) {
             return res.send("wait"); 
         } else {
-            // אם המנחה קידם את השאלה, משחררים אותו חזרה לשלוחה 1
             console.log(`[שחרור] ${userPhone} מועבר חזרה לשלוחה 1`);
             return res.send("move"); 
         }
@@ -33,10 +31,10 @@ app.get('/clicker', (req, res) => {
     if (shluha === "1") {
         
         // 1. כניסה ראשונית לשלוחה 1 (לפני שהמאזין הקיש משהו)
-        // בזכות הבדיקה הזו, המערכת תאפשר לו לשמוע את קובץ השאלה 000 בנחת!
+        // מחזיר "knesa" כדי שה-INI ידע שהכל תקין ויעבור להשמעת השאלה
         if (userChoice === undefined || userChoice === "") {
-            console.log(`[כניסה] מאזין נכנס לשלוחה 1 וממתין להקשה: ${userPhone}`);
-            return res.send(""); // מחזיר תשובה ריקה כדי שה-INI ימשיך להשמעה וקליטה
+            console.log(`[כניסה] מאזין נכנס לשלוחה 1. שולח אישור כניסה.`);
+            return res.send("knesa"); 
         }
 
         // 2. קוד מנחה (המנחה מקיש 9 בשלוחה 1 כדי לאפס)
@@ -58,10 +56,9 @@ app.get('/clicker', (req, res) => {
         return res.send("niklat"); 
     }
 
-    // הגנה כללית למקרה חירום
     res.send("");
 });
 
 app.listen(process.env.PORT || 3000, () => {
-    console.log("השרת מתוקן ומפריד בהצלחה בין כניסה ראשונית בשלוחה 1 לבדיקה בשלוחה 2!");
+    console.log("השרת מחזיר את התגובות המדויקות ל-INI בשתי השלוחות!");
 });
