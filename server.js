@@ -13,27 +13,27 @@ app.get('/clicker', (req, res) => {
     // 1. קוד מנחה - המנחה מקיש 9 בשלוחה 1 כדי לאפס את המשחק לשאלה הבאה
     if (userChoice === "9") {
         currentQuestionId++; 
-        votedUsers.clear(); // מוחק את כל מי שהצביע - כולם מורשים להצביע מחדש בשאלה החדשה
+        votedUsers.clear(); // מוחק את רשימת המצביעים - כולם יכולים להצביע מחדש בשאלה הבאה
         console.log(`[מנחה] המנחה עבר לשאלה מספר: ${currentQuestionId}! הרשימה אופסה.`);
         return res.send("go_to_folder=/1");
     }
 
-    // 2. הגנה מפני הצבעה כפולה (אם מישהו מנסה לרמות או לחזור לשלוחה 1)
+    // 2. הגנה מפני הצבעה כפולה
     if (votedUsers.has(userPhone)) {
-        console.log(`[חסום] ${userPhone} כבר הצביע בשאלה הנוכחית. מועבר חזרה להמתנה.`);
+        console.log(`[חסום] ${userPhone} כבר הצביע בשאלה הנוכחית. מועבר חזרה לשלוחה 2.`);
         return res.send("go_to_folder=/2");
     }
 
-    // 3. קליטת הצבעה רגילה (פעם ראשונה - הצלחה!)
+    // 3. קליטת הצבעה פעם ראשונה (הצלחה)
     if (userChoice) {
-        votedUsers.add(userPhone); // נועלים את המשתמש שלא יוכל להצביע שוב בשאלה הזו
+        votedUsers.add(userPhone); // נועלים את המשתמש לשאלה הזו
         console.log(`[הצבעה נקלטה] שאלה ${currentQuestionId} | טלפון: ${userPhone} | תשובה: ${userChoice}`);
-        return res.send(""); // מחזיר תגובה ריקה ומאושרת. ה-INI יזרוק אותו מיד לשלוחה 2
+        return res.send(""); // תגובה ריקה ומאושרת, ה-INI מעביר אותו מיד לשלוחה 2
     }
 
     res.send("");
 });
 
 app.listen(process.env.PORT || 3000, () => {
-    console.log("השרת פועל ומסונכרן באופן מושלם עם ימות המשיח!");
+    console.log("השרת פועל ומסונכרן עם שלוחת המשחק ושלוחת ההשמעה!");
 });
