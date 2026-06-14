@@ -10,17 +10,17 @@ app.get('/clicker', (req, res) => {
     const userChoice = req.query.user_ans; 
     const userPhone = req.query.ApiPhone; 
 
-    // 1. קוד מנחה - המנחה מקיש 9 בשלוחה 1 כדי לאפס את המשחק לשאלה הבאה
+    // 1. קוד מנחה - המנחה מקיש 9 כדי לאפס את המשחק לשאלה הבאה
     if (userChoice === "9") {
         currentQuestionId++; 
-        votedUsers.clear(); // מוחק את רשימת המצביעים - כולם יכולים להצביע מחדש בשאלה הבאה
+        votedUsers.clear(); // מוחק את רשימת המצביעים - כולם יכולים להצביע מחדש
         console.log(`[מנחה] המנחה עבר לשאלה מספר: ${currentQuestionId}! הרשימה אופסה.`);
         return res.send("go_to_folder=/1");
     }
 
-    // 2. הגנה מפני הצבעה כפולה
+    // 2. הגנה מפני הצבעה כפולה (אם מישהו מנסה לחזור ידנית לשלוחה 1)
     if (votedUsers.has(userPhone)) {
-        console.log(`[חסום] ${userPhone} כבר הצביע בשאלה הנוכחית. מועבר חזרה לשלוחה 2.`);
+        console.log(`[חסום] ${userPhone} כבר הצביע בשאלה הנוכחית. מועבר חזרה להמתנה.`);
         return res.send("go_to_folder=/2");
     }
 
@@ -28,12 +28,12 @@ app.get('/clicker', (req, res) => {
     if (userChoice) {
         votedUsers.add(userPhone); // נועלים את המשתמש לשאלה הזו
         console.log(`[הצבעה נקלטה] שאלה ${currentQuestionId} | טלפון: ${userPhone} | תשובה: ${userChoice}`);
-        return res.send(""); // תגובה ריקה ומאושרת, ה-INI מעביר אותו מיד לשלוחה 2
+        return res.send(""); // מחזיר תגובה ריקה ומאושרת, וה-INI מעביר אותו אוטומטית לשלוחה 2
     }
 
     res.send("");
 });
 
 app.listen(process.env.PORT || 3000, () => {
-    console.log("השרת פועל ומסונכרן עם שלוחת המשחק ושלוחת ההשמעה!");
+    console.log("השרת פועל ומסונכרן בצורה המושלמת והנקייה ביותר!");
 });
