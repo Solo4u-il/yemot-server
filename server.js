@@ -2,40 +2,49 @@ const express = require('express');
 const app = express();
 
 let currentQuestionId = 1; 
-let votedUsers = new Set(); 
+let votedUsers = new Map(); // נשמור באיזו שאלה כל מספר טלפון הצביע
 
 app.get('/clicker', (req, res) => {
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
 
-    const userChoice = req.query.user_ans; 
-    const userPhone = req.query.ApiPhone;   
+    const userChoice = req.query.user_ans; // מגיע משלוחה 1 (הקשה)
+    const userPhone = req.query.ApiPhone;   // מספר הטלפון של המאזין
 
-    // --- מצב 1: כניסה ראשונית לשלוחה (לפני הקשה) ---
-    if (!userChoice) {
-        console.log(`[כניסה] מאזין נכנס לשלוחה: ${userPhone}`);
-        return res.send(""); 
+    // --- א. פנייה משלוחה 2 (בדיקת סטטוס המתנה) ---
+    // אם הבקשה מגיעה ללא user_ans, סימן שהמאזין נמצא בשלוחה 2 ומחכה לעבור שאלה
+    if (userChoice === undefined || userChoice === "") {
+        const lastVotedQuestion = votedUsers.get(userPhone);
+
+        // אם המאזין כבר הצביע בשאלה הנוכחית, הוא חייב להמשיך לחכות בשלוחה 2
+        if (lastVotedQuestion === currentQuestionId) {
+            return res.send("wait"); // ה-INI של שלוחה 2 ישמיע לו מוזיקה ל-5 שניות ויבדוק שוב
+        } else {
+            // אם מספר השאלה הנוכחי גבוה יותר ממה שהוא הצביע, סימן שהמנחה איפס את המשחק!
+            console.log(`[שחרור] ${userPhone} מועבר חזרה לשלוחה 1 לשאלה החדשה מספר ${currentQuestionId}`);
+            return res.send("move"); // ה-INI של שלוחה 2 יעביר אותו מיד לשלוחה 1
+        }
     }
 
-    // --- מצב 2: קוד מנחה (איפוס משחק בהקשת 9) ---
+    // --- ב. קוד מנחה (המנחה מקיש 9 בשלוחה 1) ---
     if (userChoice === "9") {
-        currentQuestionId++; 
-        votedUsers.clear(); 
-        console.log(`[מנחה] המנחה עבר לשאלה מספר: ${currentQuestionId}! הרשימה אופסה.`);
-        return res.send("go_to_folder=/1");
+        currentQuestionId++; // עוברים רשמית לשאלה הבאה!
+        console.log(`[מנחה] המנחה עבר לשאלה מספר: ${currentQuestionId}! כולם ישוחררו בשניות הקרובות.`);
+        // המנחה עצמו מושמע הודעת מעבר ונשאר בשלוחה 1
+        return res.send("niklat"); 
     }
 
-    // --- מצב 3: הקשה נוספת / רמאות (כבר הצביע בשאלה הזו) ---
-    if (votedUsers.has(userPhone)) {
-        console.log(`[חסום] ${userPhone} ניסה להצביע שוב בשאלה מספר ${currentQuestionId}.`);
-        return res.send("taut"); // מחזיר taut לקובץ ה-INI
+    // --- ג. הגנה מפני הצבעה כפולה בשלוחה 1 ---
+    if (votedUsers.get(userPhone) === currentQuestionId) {
+        console.log(`[חסום] ${userPhone} ניסה להצביע שוב בשאלה ${currentQuestionId}.`);
+        return res.send("taut"); // ה-INI של שלוחה 1 יגיד לו הקשה שגויה ויעביר לשלוחה 2
     }
 
-    // --- מצב 4: קליטת הצבעה מוצלחת (פעם ראשונה) ---
-    votedUsers.add(userPhone); 
+    // --- ד. קליטת הצבעה מוצלחת בשלוחה 1 ---
+    votedUsers.set(userPhone, currentQuestionId); // רושמים שהטלפון הזה הצביע בשאלה הנוכחית
     console.log(`[הצבעה נקלטה] שאלה ${currentQuestionId} | טלפון: ${userPhone} | תשובה: ${userChoice}`);
-    return res.send("niklat"); // מחזיר niklat לקובץ ה-INI
+    return res.send("niklat"); // ה-INI של שלוחה 1 יגיד לו נקלט ויעביר לשלוחה 2
 });
 
 app.listen(process.env.PORT || 3000, () => {
-    console.log("השרת מעודכן ומחזיר רק סטטוסים פשוטים ל-INI!");
+    console.log("השרת מנהל את מערכת הקליקרים האוטומטית בהצלחה!");
 });
