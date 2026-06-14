@@ -24,21 +24,18 @@ app.get('/clicker', (req, res) => {
         return res.send("go_to_folder=/1");
     }
 
-    // --- מצב 3: הקשה נוספת (הצבעה כפולה / חסום) ---
+    // --- מצב 3: הקשה נוספת / רמאות (כבר הצביע בשאלה הזו) ---
     if (votedUsers.has(userPhone)) {
-        console.log(`[חסום] ${userPhone} ניסה להצביע שוב. נשלחה הודעת שגיאה.`);
-        // משמיע "הקשה לא תקפה" (או הודעת טקסט שהמערכת מקריאה) ומעביר אותו לשלוחה 2 (המתנה)
-        return res.send("id_list_message=t-הקשה_לא_תקפה\r\ngo_to_folder=/2"); 
+        console.log(`[חסום] ${userPhone} ניסה להצביע שוב בשאלה מספר ${currentQuestionId}.`);
+        return res.send("taut"); // מחזיר taut לקובץ ה-INI
     }
 
-    // --- מצב 4: הקשה ראשונה (הצבעה מוצלחת!) ---
+    // --- מצב 4: קליטת הצבעה מוצלחת (פעם ראשונה) ---
     votedUsers.add(userPhone); 
     console.log(`[הצבעה נקלטה] שאלה ${currentQuestionId} | טלפון: ${userPhone} | תשובה: ${userChoice}`);
-    
-    // משמיע "נקלט" ומעביר אותו מיד לשלוחה 2 (המתנה)
-    return res.send("id_list_message=t-נקלט\r\ngo_to_folder=/2"); 
+    return res.send("niklat"); // מחזיר niklat לקובץ ה-INI
 });
 
 app.listen(process.env.PORT || 3000, () => {
-    console.log("השרת מעודכן עם פיצול הודעות ומעבר לשלוחת המתנה!");
+    console.log("השרת מעודכן ומחזיר רק סטטוסים פשוטים ל-INI!");
 });
