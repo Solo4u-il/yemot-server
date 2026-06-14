@@ -2,17 +2,19 @@ const express = require('express');
 const app = express();
 
 app.get('/clicker', (req, res) => {
-    // ימות המשיח שולחים את התשובה בפרמטר שהגדרנו ב-ext.ini
+    // קריאת הפרמטרים שנשלחים אוטומטית לפי ה-PDF
     const userChoice = req.query.user_ans;
-    const userPhone = req.query.ApiPhone; // מספר הטלפון מגיע אוטומטית כברירת מחדל
+    const userPhone = req.query.ApiPhone;
 
+    // אם המשתמש הקיש ספרה (1, 2, 3...)
     if (userChoice) {
-        // הדפסה חלקה בזמן אמת לשרת (עבור מסך המנחה שלך!)
-        console.log(`[קליקר אונליין] הטלפון: ${userPhone} | בחר בתשובה: ${userChoice}`);
+        // הדפסה מיידית ללוג של השרת - כאן זה יופיע אצלך במסך המנחה בזמן אמת!
+        console.log(`[קליקר חי] טלפון: ${userPhone} | הקיש: ${userChoice}`);
     }
 
-    // בסיום, השרת אומר למערכת להשמיע הודעה קצרה ולנתק (hangup) כדי שלא יחזור לתפריט הראשי
-    res.send("id_list=t-תשובתך נקלטה, תודה.&תחזיר=hangup");
+    // הכלל החשוב ביותר: כדי שלא יחזור לתפריט הראשי, אנחנו שולחים פקודת מעבר תיקייה חזרה לשלוחה 1.
+    // זה משאיר את המאזין על הקו באותה שלוחה בדיוק ומפעיל מחדש את api_000 לקבלת ההקשה הבאה!
+    res.send("go_to_folder=/1&");
 });
 
 app.listen(process.env.PORT || 3000, () => {
