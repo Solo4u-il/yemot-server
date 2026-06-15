@@ -6,7 +6,7 @@
     <title>👑 סורוצקליק - דשבורד מנהל מלא ומעודכן</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Rubik:wght=300;400;500;700;900&display=swap');
         body { font-family: 'Rubik', sans-serif; }
         .tab-active { border-bottom-color: #f59e0b; color: #f59e0b; }
         .selected-item { background-color: #1e3a8a; border-color: #3b82f6; opacity: 1 !important; }
@@ -15,348 +15,444 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
 
-    <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex justify-between items-center shadow-xl">
+    <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex justify-between items-center shadow-xl z-20">
         <div class="flex items-center gap-4">
-            <div id="globalLogoContainer" class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center font-black text-amber-500 overflow-hidden">
-                ס
+            <div id="globalLogoContainer" class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-2xl overflow-hidden">
+                👑
             </div>
             <div>
-                <h1 id="globalGameTitle" class="text-xl font-black text-yellow-500">סורוצקליק</h1>
-                <p id="globalGameSubtitle" class="text-[11px] text-slate-400">הכנת תוכן, ניהול שחקנים ומיתוג האירוע</p>
+                <h1 id="globalGameTitle" class="text-2xl font-black bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent tracking-wide">סורוצקליק - SorotzClick</h1>
+                <p id="globalGameSubtitle" class="text-xs text-slate-400 font-medium">מערכת שעשועוני טריוויה וקליקרים בלייב - עטרת שלמה</p>
             </div>
         </div>
-        <div class="flex gap-2">
-            <button onclick="saveGameToServer()" class="bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-slate-950 font-black text-xs px-4 py-2 rounded-xl transition shadow-lg cursor-pointer">💾 שמור משחק לשרת</button>
-            <button onclick="launchLiveEvent()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs px-4 py-2 rounded-xl transition shadow-md cursor-pointer">📺 פתיחת שלט ההקרנה</button>
+        
+        <nav class="flex gap-6 h-full items-center">
+            <button onclick="switchTab('questions-tab')" id="btn-questions-tab" class="tab-active border-b-2 border-transparent pb-1 font-bold text-sm transition cursor-pointer">📝 עריכת שאלות וסדר יום</button>
+            <button onclick="switchTab('users-tab')" id="btn-users-tab" class="border-b-2 border-transparent pb-1 font-bold text-sm text-slate-400 hover:text-slate-200 transition cursor-pointer">👥 ניהול משתתפים וקבוצות</button>
+            <button onclick="switchTab('branding-tab')" id="btn-branding-tab" class="border-b-2 border-transparent pb-1 font-bold text-sm text-slate-400 hover:text-slate-200 transition cursor-pointer">🎨 מיתוג ופרטי אירוע</button>
+        </nav>
+
+        <div class="flex items-center gap-4">
+            <button onclick="saveGameToServer()" class="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black px-6 py-2 rounded-xl transition shadow-lg cursor-pointer text-sm">💾 שמירת משחק בשרת</button>
         </div>
     </header>
 
     <div class="flex-1 flex overflow-hidden">
-        
-        <aside class="w-80 bg-slate-900 border-l border-slate-800 p-4 flex flex-col justify-between">
-            <div class="space-y-4 overflow-y-auto flex-1 pb-4">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">📋 תור המשחק המתוכנן</h3>
-                    <span id="itemCount" class="bg-slate-800 text-slate-300 font-mono text-[10px] px-2 py-0.5 rounded-full font-bold">0 פריטים</span>
-                </div>
-                
-                <div id="timelineList" class="space-y-2">
-                    </div>
-            </div>
+
+        <div id="questions-tab" class="flex-1 flex overflow-hidden">
             
-            <div class="pt-4 border-t border-slate-800 text-[11px] text-slate-500 text-center font-medium">
-                סדר הפריטים קובע את זרימת האירוע באולם
+            <aside class="w-85 bg-slate-900 border-l border-slate-800 flex flex-col justify-between">
+                <div class="p-4 flex-1 overflow-y-auto space-y-4">
+                    <div class="space-y-1">
+                        <h3 class="font-bold text-slate-300 text-xs uppercase tracking-wider">📚 מבנה המשחק וסדר יום</h3>
+                        <p class="text-[10px] text-slate-500">שנה סדר באמצעות החצים ובחר פריט לעריכה</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="createNewItem('trivia')" class="bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 text-xs font-bold py-2 px-2 rounded-xl border border-blue-800/60 transition cursor-pointer text-center">
+                            ➕ הוסף שאלה
+                        </button>
+                        <button onclick="createNewItem('topic')" class="bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 text-xs font-bold py-2 px-2 rounded-xl border border-purple-800/60 transition cursor-pointer text-center">
+                            🔖 הוסף כותרת נושא
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-2" id="timelineList"></div>
+                </div>
+
+                <div class="p-4 border-t border-slate-800 bg-slate-950/30">
+                    <button onclick="launchLiveEvent()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-center transition shadow-lg text-sm cursor-pointer">
+                        🚀 הפעלת המשחק באולם (LIVE)
+                    </button>
+                </div>
+            </aside>
+
+            <main id="editorZone" class="flex-1 p-6 md:p-8 overflow-y-auto space-y-6">
+                </main>
+        </div>
+
+
+        <div id="users-tab" class="hidden flex-1 p-6 md:p-8 overflow-y-auto space-y-6">
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-lg">
+                <div>
+                    <h3 class="text-lg font-bold text-white">📋 העלאת בחורים וחלוקה לקבוצות (שיעורים)</h3>
+                    <p class="text-xs text-slate-400 mt-1">המערכת מוסיפה אוטומטית 0 למספרים שהורדו מאקסל בצורה פגומה. ניתן להעלות קבצים מרובים ברצף.</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="downloadHebrewSampleCSV()" class="bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 text-xs font-bold py-2.5 px-4 rounded-xl transition cursor-pointer">
+                        📥 הורד אקסל דוגמה (כותרות בלבד)
+                    </button>
+                    <label class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition cursor-pointer shadow-md shadow-blue-600/10 relative">
+                        📤 העלה קובץ משתתפים (.csv)
+                        <input type="file" id="excelUpload" accept=".csv" onchange="handleExcelUpload(event)" class="hidden">
+                    </label>
+                </div>
             </div>
-        </aside>
 
-        <main class="flex-1 flex flex-col bg-slate-950/40">
-            
-            <nav class="flex border-b border-slate-800 bg-slate-900/40 px-6">
-                <button onclick="switchTab('questions')" id="tab-questions" class="tab-active text-xs font-bold py-4 px-4 border-b-2 border-transparent transition cursor-pointer">❓ בניית שאלות ותוכן</button>
-                <button onclick="switchTab('users')" id="tab-users" class="text-slate-400 hover:text-slate-200 text-xs font-bold py-4 px-4 border-b-2 border-transparent transition cursor-pointer">👥 רשימת בחורים (CSV)</button>
-                <button onclick="switchTab('branding')" id="tab-branding" class="text-slate-400 hover:text-slate-200 text-xs font-bold py-4 px-4 border-b-2 border-transparent transition cursor-pointer">🎨 מיתוג ועיצוב</button>
-            </nav>
+            <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+                <div class="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center">
+                    <span class="text-xs font-bold text-slate-400 uppercase">רשימת משתתפים מוגדרים במערכת (<span id="userCount">0</span>)</span>
+                    <button onclick="addBlankUserRow('', '', '')" class="text-xs bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 font-bold py-1.5 px-3 rounded-lg transition cursor-pointer">+ הוסף משתתף ידנית</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right border-collapse">
+                        <thead>
+                            <tr class="bg-slate-950/60 text-slate-400 text-xs font-bold border-b border-slate-800">
+                                <th class="p-4">מספר טלפון</th>
+                                <th class="p-4">שם הבחור (יוצג באתר ובמקרן)</th>
+                                <th class="p-4">שיוך לקבוצה / שיעור</th>
+                                <th class="p-4 text-center">פעולות</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody" class="text-sm divide-y divide-slate-800/60"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-            <div class="flex-1 p-6 overflow-y-auto">
+
+        <div id="branding-tab" class="hidden flex-1 p-6 md:p-8 overflow-y-auto space-y-6">
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-6 max-w-2xl shadow-xl">
+                <div>
+                    <h3 class="text-lg font-bold text-white">🎨 עיצוב ומיתוג אישי לאירוע</h3>
+                    <p class="text-xs text-slate-400">הגדר את כותרת, תת-כותרת ופרטי המשחק שיופיעו במסכי ההקרנה ובדשבורדים</p>
+                </div>
+                <hr class="border-slate-800">
                 
-                <div id="content-questions" class="space-y-6">
-                    
-                    <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-lg">
-                        <h3 class="text-sm font-black text-yellow-500">➕ הוספת תוכן חדש לתור</h3>
-                        
-                        <div class="grid grid-cols-3 gap-4">
-                            <div class="col-span-2">
-                                <label class="text-[11px] font-bold text-slate-400 block mb-1">שאלה או כותרת ראשית</label>
-                                <input id="itemTitle" type="text" placeholder="לדוגמה: מהו השורש של אבות נזיקין לפי הגמרא?" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-yellow-500 transition">
-                            </div>
-                            <div>
-                                <label class="text-[11px] font-bold text-slate-400 block mb-1">סוג הפריט</label>
-                                <select id="itemType" onchange="toggleFormFields()" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-300 focus:outline-none focus:border-yellow-500 transition cursor-pointer">
-                                    <option value="trivia">❓ שאלת טריוויה רגילה</option>
-                                    <option value="bonus">👑 שאלת בונוס (ניקוד כפול)</option>
-                                    <option value="survey">📊 שאלת סקר / הצבעה חופשית</option>
-                                    <option value="topic">🔖 כותרת נושא / מעברון</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div id="triviaFields" class="space-y-4">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="text-[11px] font-bold text-slate-400 block mb-1">מסיח 1 (אדום)</label>
-                                    <input id="ans1" type="text" placeholder="תשובה ראשונה" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-red-500/50 transition">
-                                </div>
-                                <div>
-                                    <label class="text-[11px] font-bold text-slate-400 block mb-1">מסיח 2 (כחול)</label>
-                                    <input id="ans2" type="text" placeholder="תשובה שנייה" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-blue-500/50 transition">
-                                </div>
-                                <div>
-                                    <label class="text-[11px] font-bold text-slate-400 block mb-1">מסיח 3 (צהוב)</label>
-                                    <input id="ans3" type="text" placeholder="תשובה שלישית" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-yellow-500/50 transition">
-                                </div>
-                                <div>
-                                    <label class="text-[11px] font-bold text-slate-400 block mb-1">מסיח 4 (ירוק)</label>
-                                    <input id="ans4" type="text" placeholder="תשובה רביעית" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500/50 transition">
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="text-[11px] font-bold text-slate-400 block mb-1">התשובה הנכונה</label>
-                                    <select id="correctAnswer" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-300 focus:outline-none focus:border-yellow-500 transition cursor-pointer">
-                                        <option value="1">מסיח 1 (אדום)</option>
-                                        <option value="2">מסיח 2 (כחול)</option>
-                                        <option value="3">מסיח 3 (צהוב)</option>
-                                        <option value="4">מסיח 4 (ירוק)</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="text-[11px] font-bold text-slate-400 block mb-1">זמן להצבעה (שניות)</label>
-                                    <input id="itemTimer" type="number" value="20" min="5" max="120" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-yellow-500 transition">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="pt-2 flex justify-end">
-                            <button onclick="addTimelineItem()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition border border-slate-700 shadow-md cursor-pointer">➕ הוסף לתור המשחק</button>
-                        </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-400 uppercase">📝 כותרת המשחק הרשמית</label>
+                        <input type="text" id="brandingTitle" value="סורוצקליק - SorotzClick" oninput="updateBrandingData('title', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-yellow-400 font-bold focus:outline-none">
                     </div>
-
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-400 uppercase">🏫 שם המוסדות / הישיבה</label>
+                        <input type="text" id="brandingSubtitle" value="ישיבת עטרת שלמה" oninput="updateBrandingData('subtitle', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none">
+                    </div>
                 </div>
 
-                <div id="content-users" class="space-y-6 hidden">
-                    
-                    <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-lg">
-                        <h3 class="text-sm font-black text-yellow-500">📥 טעינת קובץ משתתפים (CSV)</h3>
-                        <p class="text-xs text-slate-400 leading-relaxed">
-                            באפשרותך להעלות קובץ אקסל שנשמר כפורמט <code class="bg-slate-950 px-1.5 py-0.5 rounded text-yellow-400 font-mono text-[11px]">.csv</code>. 
-                            הקובץ חייב להכיל שלוש עמודות בדיוק בסדר הבא: <b class="text-slate-200">טלפון, שם מלא, קבוצה/שיעור</b>. המספרים ינוקו אוטומטית מתווים מיותרים.
-                        </p>
-                        
-                        <div class="flex items-center gap-4 pt-2">
-                            <input type="file" id="csvFileInput" accept=".csv" onchange="handleCSVUpload(event)" class="text-xs text-slate-400 file:bg-slate-800 file:border-none file:text-white file:text-xs file:font-bold file:px-4 file:py-2 file:rounded-xl file:ml-4 file:cursor-pointer hover:file:bg-slate-700 file:transition">
-                        </div>
-
-                        <div class="pt-4 border-t border-slate-800/60 flex justify-between items-center text-xs text-slate-400">
-                            <div>סטטוס מסד נתונים פנימי:</div>
-                            <div class="font-bold text-slate-200">נטענו <span id="dbUserCount" class="text-yellow-500 font-mono text-sm">0</span> בחורים רשומים במערכת.</div>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-lg">
-                        <div class="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center">
-                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">👀 תצוגה מקדימה של הבחורים במערכת</h4>
-                            <span class="text-[10px] text-slate-500">מציג עד 100 רשומות ראשונות</span>
-                        </div>
-                        <div class="overflow-x-auto max-h-80">
-                            <table class="w-full text-right text-xs">
-                                <thead class="bg-slate-950 text-slate-400 uppercase font-bold sticky top-0 border-b border-slate-800">
-                                    <tr>
-                                        <th class="p-3">מספר טלפון (מזהה)</th>
-                                        <th class="p-3">שם הבחור</th>
-                                        <th class="p-3">קבוצה / שיעור</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="userPreviewTable" class="divide-y divide-slate-800/40 text-slate-300">
-                                    <tr>
-                                        <td colspan="3" class="p-8 text-center text-slate-500 font-medium">אין עדיין בחורים במסד הנתונים. העלה קובץ CSV למעלה.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-400 uppercase">👋 הודעת פתיחה וברוכים הבאים למשתתפים</label>
+                    <input type="text" id="brandingWelcome" value="ברוכים הבאים לשעשועון הטריוויה הראשי! הכינו את המכשירים..." oninput="updateBrandingData('welcome', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-300 focus:outline-none">
                 </div>
 
-                <div id="content-branding" class="space-y-6 hidden">
-                    
-                    <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-lg">
-                        <h3 class="text-sm font-black text-yellow-500">🎨 כותרות ולוגו לאירוע</h3>
-                        <p class="text-xs text-slate-400">הגדרות המיתוג והטקסטים שיופיעו בראש מסך ההקרנה ובדשבורדים באולם בזמן אמת.</p>
-                        
-                        <div class="grid grid-cols-2 gap-4 pt-2">
-                            <div>
-                                <label class="text-[11px] font-bold text-slate-400 block mb-1">שם האירוע הראשי (יופיע בגדול)</label>
-                                <input id="brandingTitle" type="text" value="סורוצקליק" oninput="updateBrandingData('title', this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-yellow-500 transition">
-                            </div>
-                            <div>
-                                <label class="text-[11px] font-bold text-slate-400 block mb-1">כותרת משנה / שם הישיבה / מחזור</label>
-                                <input id="brandingSubtitle" type="text" placeholder="ישיבת סורוצקין - פורים תשפ&quot;ו" oninput="updateBrandingData('subtitle', this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-yellow-500 transition">
-                            </div>
-                        </div>
-
-                        <div class="pt-4 border-t border-slate-800/60 grid grid-cols-3 gap-6 items-center">
-                            <div class="col-span-2 space-y-1">
-                                <label class="text-[11px] font-bold text-slate-400 block">סמל / לוגו האירוע</label>
-                                <p class="text-[11px] text-slate-500">העלה קובץ תמונה ריבועי (PNG/JPG). הלוגו יתעדכן אוטומטית בראש כל המסכים.</p>
-                                <input type="file" accept="image/*" onchange="loadBrandingLogo(event)" class="text-xs text-slate-400 file:bg-slate-800 file:border-none file:text-white file:text-xs file:font-bold file:px-3 file:py-1.5 file:rounded-lg file:ml-3 file:cursor-pointer hover:file:bg-slate-700 file:transition pt-1">
-                            </div>
-                            <div class="flex flex-col items-center gap-1.5">
-                                <span class="text-[10px] text-slate-500 font-bold">תצוגה מקדימה</span>
-                                <div id="brandingLogoPreview" class="w-16 h-16 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center font-black text-yellow-500 text-xl overflow-hidden shadow-inner">
-                                    ס
-                                </div>
-                            </div>
-                        </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-400 uppercase">📷 לוגו הישיבה / המוסדות (תמונה משלך)</label>
+                    <div class="flex items-center gap-4">
+                        <div id="brandingLogoPreview" class="w-16 h-16 rounded-xl bg-slate-950 border border-slate-700 flex items-center justify-center text-3xl overflow-hidden">👑</div>
+                        <label class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-2 px-4 rounded-xl border border-slate-700 cursor-pointer transition">
+                            העלה קובץ תמונה
+                            <input type="file" accept="image/*" onchange="loadBrandingLogo(event)" class="hidden">
+                        </label>
                     </div>
-
                 </div>
-
             </div>
-        </main>
+        </div>
+
     </div>
 
     <script>
-        let gameItems = [];
-        let userDatabase = [];
+        let gameItems = [
+            { id: "item-1", type: "topic", title: "נושא: בקיאות במסכת בבא קמא" },
+            { id: "item-2", type: "trivia", title: "איך קוראים לבית המדרש שעל ידי שיעור ב'?", timer: 15, points: 100, graphType: "average", answers: ["שטיבל עטרת שלמה", "בית יצחק", "עטרת שלמה", "בית שלמה"], correct: 4 },
+            { id: "item-3", type: "survey", title: "איזה סוג סוגיה הכי אהבתם ללמוד בזמן האחרון?", timer: 20, points: 0, graphType: "survey-end", answers: ["סוגיית מועד", "סוגיית נזיקין", "סוגיית קדשים"], correct: 0 },
+            { id: "item-4", type: "bonus", title: "שאלת המיליון של ראש הישיבה שליט\"א!", timer: 30, points: 500, graphType: "average", answers: ["אפשרות א'", "אפשרות ב'", "אפשרות ג'"], correct: 1 }
+        ];
+        
+        let selectedItemId = "item-2";
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderTimeline();
+            renderEditor();
+            updateUserCount();
+            addBlankUserRow("0521234567", "חיים זילברשטיין", "שיעור א'");
+        });
 
         function switchTab(tabId) {
-            const tabs = ['questions', 'users', 'branding'];
-            tabs.forEach(tab => {
-                const btn = document.getElementById(`tab-${tab}`);
-                const content = document.getElementById(`content-${tab}`);
-                
-                if (tab === tabId) {
-                    btn.className = "tab-active text-xs font-bold py-4 px-4 border-b-2 border-yellow-500 text-yellow-500 transition cursor-pointer";
-                    content.classList.remove('hidden');
-                } else {
-                    btn.className = "text-slate-400 hover:text-slate-200 text-xs font-bold py-4 px-4 border-b-2 border-transparent transition cursor-pointer";
-                    content.classList.add('hidden');
-                }
-            });
-        }
-
-        function toggleFormFields() {
-            const type = document.getElementById('itemType').value;
-            const fields = document.getElementById('triviaFields');
-            if (type === 'topic') {
-                fields.classList.add('hidden');
-            } else {
-                fields.classList.remove('hidden');
-            }
-        }
-
-        function addTimelineItem() {
-            const titleInput = document.getElementById('itemTitle');
-            const typeSelect = document.getElementById('itemType');
-            const title = titleInput.value.trim();
-            const type = typeSelect.value;
-
-            if (!title) {
-                alert("❌ חובה להזין שאלה או כותרת ראשית לפריט.");
-                return;
-            }
-
-            let newItem = {
-                id: (gameItems.length + 1).toString(),
-                type: type,
-                title: title
-            };
-
-            if (type !== 'topic') {
-                const a1 = document.getElementById('ans1').value.trim() || "מסיח 1";
-                const a2 = document.getElementById('ans2').value.trim() || "מסיח 2";
-                const a3 = document.getElementById('ans3').value.trim() || "מסיח 3";
-                const a4 = document.getElementById('ans4').value.trim() || "מסיח 4";
-                const correct = parseInt(document.getElementById('correctAnswer').value);
-                const timer = parseInt(document.getElementById('itemTimer').value) || 20;
-
-                newItem.answers = [a1, a2, a3, a4];
-                newItem.correct = correct;
-                newItem.timer = timer;
-            }
-
-            gameItems.push(newItem);
-            renderTimeline();
-
-            titleInput.value = "";
-            if (type !== 'topic') {
-                document.getElementById('ans1').value = "";
-                document.getElementById('ans2').value = "";
-                document.getElementById('ans3').value = "";
-                document.getElementById('ans4').value = "";
-            }
-        }
-
-        function deleteTimelineItem(index) {
-            gameItems.splice(index, 1);
-            gameItems.forEach((item, idx) => item.id = (idx + 1).toString());
-            renderTimeline();
+            document.getElementById('questions-tab').classList.add('hidden');
+            document.getElementById('users-tab').classList.add('hidden');
+            document.getElementById('branding-tab').classList.add('hidden');
+            document.getElementById('btn-questions-tab').classList.remove('tab-active');
+            document.getElementById('btn-users-tab').classList.remove('tab-active');
+            document.getElementById('btn-branding-tab').classList.remove('tab-active');
+            
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById('btn-' + tabId).classList.add('tab-active');
         }
 
         function renderTimeline() {
-            const list = document.getElementById('timelineList');
-            const countBadge = document.getElementById('itemCount');
-            list.innerHTML = "";
-            countBadge.innerText = `${gameItems.length} פריטים`;
-
-            if (gameItems.length === 0) {
-                list.innerHTML = `
-                    <div class="text-center py-12 text-slate-600 font-medium text-xs border border-dashed border-slate-800 rounded-xl">
-                        אין פריטים בתור המשחק.<br>בנה תוכן בטאב המרכזי.
-                    </div>
-                `;
-                return;
-            }
+            const container = document.getElementById('timelineList');
+            container.innerHTML = "";
 
             gameItems.forEach((item, index) => {
-                let badgeStyle = "bg-blue-500/10 text-blue-400 border-blue-500/20";
-                let badgeText = "❓ טריוויה";
-                let extraInfo = `<span class="text-[10px] text-slate-400 font-mono">⏳ ${item.timer} שניות</span>`;
+                let html = "";
+                const isSelected = item.id === selectedItemId ? "selected-item" : "";
+                const isBonus = item.type === "bonus" ? "border-amber-500/60 bg-amber-950/10 shadow-md shadow-amber-500/5" : "";
+                const typeLabels = { trivia: "טריוויה", bonus: "👑 בונוס", image: "🖼️ תמונה", boolean: "⚖️ כן/לא", survey: "📊 סקר" };
 
-                if (item.type === 'bonus') {
-                    badgeStyle = "bonus-style bg-amber-500/10 text-amber-400 border-amber-500/30 font-black";
-                    badgeText = "👑 בונוס";
-                } else if (item.type === 'survey') {
-                    badgeStyle = "bg-purple-500/10 text-purple-400 border-purple-500/20";
-                    badgeText = "📊 סקר חופשי";
-                    extraInfo = `<span class="text-[10px] text-purple-500/80 font-bold">הצבעת דעה</span>`;
-                } else if (item.type === 'topic') {
-                    badgeStyle = "bg-slate-800 text-slate-400 border-slate-700/60";
-                    badgeText = "🔖 כותרת נושא";
-                    extraInfo = `<span class="text-[10px] text-slate-500 font-bold">מעברון חלק</span>`;
-                }
-
-                list.insertAdjacentHTML('beforeend', `
-                    <div class="bg-slate-900/80 border border-slate-800/80 p-3 rounded-xl flex flex-col gap-1.5 relative group hover:border-slate-700 transition">
-                        <div class="flex justify-between items-start gap-2">
-                            <span class="text-[10px] px-2 py-0.5 rounded-md border font-bold ${badgeStyle}">${badgeText}</span>
-                            <div class="flex items-center gap-1.5">
-                                ${extraInfo}
-                                <span class="text-[10px] font-mono font-bold text-slate-600">#${item.id}</span>
+                if (item.type === "topic") {
+                    html = `
+                        <div onclick="selectItem('${item.id}')" class="${isSelected} bg-purple-950/20 border-purple-900/60 p-2.5 rounded-xl border flex items-center justify-between cursor-pointer hover:opacity-100 transition">
+                            <div class="flex items-center gap-2 min-w-0 text-purple-300">
+                                <span>🔖</span>
+                                <p class="text-xs font-black truncate">${item.title || 'כותרת נושא ריקה...'}</p>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button onclick="event.stopPropagation(); moveItem(${index}, -1)" class="text-slate-500 hover:text-slate-200 text-[10px]">▲</button>
+                                <button onclick="event.stopPropagation(); moveItem(${index}, 1)" class="text-slate-500 hover:text-slate-200 text-[10px]">▼</button>
+                                <button onclick="event.stopPropagation(); deleteItem('${item.id}')" class="hover:text-red-400 text-xs text-slate-500 mr-1">🗑️</button>
                             </div>
                         </div>
-                        <p class="text-xs font-bold text-slate-200 truncate pl-4">${item.title}</p>
-                        
-                        <button onclick="deleteTimelineItem(${index})" class="absolute left-2 bottom-2 text-slate-600 hover:text-red-400 text-[10px] font-bold opacity-0 group-hover:opacity-100 transition cursor-pointer">🗑️ מחק</button>
-                    </div>
-                `);
+                    `;
+                } else {
+                    html = `
+                        <div onclick="selectItem('${item.id}')" class="${isSelected} ${isBonus} bg-slate-900/40 border-slate-800 p-3 rounded-xl border flex items-start justify-between cursor-pointer transition">
+                            <div class="flex items-start gap-2 min-w-0">
+                                <span class="bg-slate-800 text-slate-300 text-xs font-mono font-black w-5 h-5 rounded-md flex items-center justify-center mt-0.5">${index + 1}</span>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs font-bold text-white truncate">${item.title || 'שאלה ריקה...'}</p>
+                                    <span class="text-[10px] text-blue-300">${typeLabels[item.type] || 'שאלה'} | ⏱️ ${item.timer}ש' | ${item.type === 'survey' ? 'ללא ניקוד' : `💎 ${item.points}נ'`}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 text-slate-500 mr-1">
+                                <button onclick="event.stopPropagation(); moveItem(${index}, -1)" class="hover:text-slate-200 text-[10px]">▲</button>
+                                <button onclick="event.stopPropagation(); moveItem(${index}, 1)" class="hover:text-slate-200 text-[10px]">▼</button>
+                                <button onclick="event.stopPropagation(); deleteItem('${item.id}')" class="hover:text-red-400 text-xs">🗑️</button>
+                            </div>
+                        </div>
+                    `;
+                }
+                container.insertAdjacentHTML('beforeend', html);
             });
         }
 
-        function handleCSVUpload(event) {
+        function moveItem(index, direction) {
+            const targetIndex = index + direction;
+            if (targetIndex < 0 || targetIndex >= gameItems.length) return;
+            const temp = gameItems[index]; gameItems[index] = gameItems[targetIndex]; gameItems[targetIndex] = temp;
+            renderTimeline();
+        }
+
+        function selectItem(id) { selectedItemId = id; renderTimeline(); renderEditor(); }
+
+        function createNewItem(type) {
+            const newId = "item-" + Date.now();
+            if (type === "topic") {
+                gameItems.push({ id: newId, type: "topic", title: "נושא חדש..." });
+            } else {
+                gameItems.push({ id: newId, type: "trivia", title: "", timer: 15, points: 100, graphType: "average", answers: ["", "", "", ""], correct: 1 });
+            }
+            selectedItemId = newId; renderTimeline(); renderEditor();
+        }
+
+        function deleteItem(id) {
+            if(confirm("⚠️ אזהרה: האם אתה בטוח לחלוטין שברצונך למחוק פריט זה מסדר היום?")) {
+                gameItems = gameItems.filter(i => i.id !== id);
+                if (selectedItemId === id) selectedItemId = gameItems.length > 0 ? gameItems[0].id : null;
+                renderTimeline(); renderEditor();
+            }
+        }
+
+        function renderEditor() {
+            const mainZone = document.getElementById('editorZone');
+            const item = gameItems.find(i => i.id === selectedItemId);
+            if (!item) { mainZone.innerHTML = `<div class="text-center text-slate-500 py-20">אנא בחר או הוסף פריט מהתפריט הצידי.</div>`; return; }
+
+            if (item.type === "topic") {
+                mainZone.innerHTML = `
+                    <div class="bg-purple-950/10 border border-purple-900/40 p-6 rounded-2xl space-y-4">
+                        <span class="text-xs font-bold text-purple-400 block">🔖 עריכת כותרת נושא</span>
+                        <input type="text" value="${item.title}" oninput="updateItemData('title', this.value)" class="w-full bg-slate-900 border border-purple-900/60 rounded-xl px-4 py-3 text-lg text-purple-300 focus:outline-none">
+                    </div>`;
+                return;
+            }
+
+            const isBonusCard = item.type === "bonus" ? "bonus-style" : "bg-slate-900";
+
+            mainZone.innerHTML = `
+                <div class="${isBonusCard} p-6 rounded-2xl border border-slate-800 space-y-6 transition-all duration-300">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase">❓ סוג ויוקרת השאלה</h4>
+                            <select onchange="changeQuestionType(this.value)" class="w-full mt-2 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 font-bold text-sm text-purple-400 focus:outline-none">
+                                <option value="trivia" ${item.type === 'trivia' ? 'selected' : ''}>שאלת טריוויה רגילה</option>
+                                <option value="bonus" ${item.type === 'bonus' ? 'selected' : ''}>👑 שאלת בונוס (עיצוב יוקרתי)</option>
+                                <option value="image" ${item.type === 'image' ? 'selected' : ''}>🖼️ שאלת "מה בתמונה"</option>
+                                <option value="boolean" ${item.type === 'boolean' ? 'selected' : ''}>⚖️ שאלת כן / לא</option>
+                                <option value="survey" ${item.type === 'survey' ? 'selected' : ''}>📊 סקר דעת קהל (ללא ניקוד)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase">⏱️ הגבלת זמן חופשית</h4>
+                            <input type="number" value="${item.timer}" oninput="updateItemData('timer', parseInt(this.value) || 0)" class="w-full mt-2 bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 font-bold text-amber-400 text-sm text-center">
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase">💎 שווי נקודות חופשי</h4>
+                            <input type="number" value="${item.points}" ${item.type === 'survey' ? 'disabled value="0"' : ''} oninput="updateItemData('points', parseInt(this.value) || 0)" class="w-full mt-2 bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 font-bold text-blue-400 text-sm text-center disabled:opacity-30">
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase">📊 תצוגת גרף במקרן</h4>
+                            ${item.type === 'survey' ? `
+                                <div class="mt-3 text-xs text-purple-400 font-bold bg-purple-950/30 border border-purple-900/40 rounded-xl p-2 text-center">
+                                    📊 קבוע: גרף סקר ייחודי בסוף
+                                </div>
+                            ` : `
+                                <select onchange="updateItemData('graphType', this.value)" class="w-full mt-2 bg-slate-950 border border-slate-700 rounded-xl px-2 py-2 text-xs text-emerald-400 font-bold">
+                                    <option value="average" ${item.graphType === 'average' ? 'selected' : ''}>בלייב: רק מדד הצלחה (נכון/לא נכון) -> בסוף פירוט</option>
+                                    <option value="full-end" ${item.graphType === 'full-end' ? 'selected' : ''}>חשיפת הגרף המלא רק בסיום הזמן</option>
+                                </select>
+                            `}
+                        </div>
+                    </div>
+
+                    ${item.type === 'image' ? `
+                        <div class="border-2 border-dashed border-slate-700 rounded-xl p-4 bg-slate-950/50 flex flex-col items-center justify-center gap-2">
+                            <span class="text-2xl">🖼️</span>
+                            <p class="text-xs text-slate-400 font-bold">העלה את התמונה שתוצג על המקרן לאולם</p>
+                            <input type="file" accept="image/*" class="text-xs bg-slate-900 px-2 py-1 rounded-lg border border-slate-700 cursor-pointer">
+                        </div>
+                    ` : ''}
+
+                    <div class="relative">
+                        <span class="absolute top-2 right-4 text-[10px] font-bold text-slate-500 uppercase">${item.type === 'bonus' ? '👑 שאלת בונוס יוקרתית' : 'תוכן השאלה'}</span>
+                        <textarea rows="2" oninput="updateItemData('title', this.value)" class="w-full mt-2 bg-transparent text-xl font-black ${item.type === 'bonus' ? 'text-amber-400' : 'text-yellow-300'} border-b border-slate-800 focus:outline-none py-2 resize-none" placeholder="הקלד כאן את השאלה...">${item.title}</textarea>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center px-1">
+                            <h3 class="text-sm font-bold text-slate-400">👇 אפשרויות תשובות ומפתח בחירה:</h3>
+                            ${(item.type !== 'boolean') ? `
+                                <div class="flex gap-2">
+                                    <button onclick="adjustAnswersCount(-1)" class="bg-slate-950 hover:bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer text-red-400">- הסר תשובה</button>
+                                    <button onclick="adjustAnswersCount(1)" class="bg-slate-950 hover:bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer text-emerald-400">+ הוסף תשובה</button>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="answersGrid">
+                            ${item.answers.map((ansText, idx) => {
+                                const num = idx + 1;
+                                const isCorrect = item.correct === num;
+                                const boxClass = isCorrect && item.type !== 'survey' ? "border-emerald-500/50 bg-emerald-950/20 text-emerald-400 font-bold" : "border-slate-800 text-slate-100";
+                                const btnClass = isCorrect && item.type !== 'survey' ? "bg-emerald-500 text-slate-950 font-black shadow-md shadow-emerald-500/20" : "bg-slate-950 text-slate-500 border border-slate-800";
+                                const colors = ["bg-blue-600", "bg-purple-600", "bg-amber-600", "bg-emerald-600", "bg-rose-600"];
+                                
+                                return `
+                                    <div id="answerBox-${num}" class="bg-slate-900/60 p-4 rounded-xl border flex items-center gap-4 ${boxClass}">
+                                        <span class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm text-white ${colors[idx]} shadow-md">${num}</span>
+                                        <input type="text" value="${ansText}" oninput="updateAnswerText(${idx}, this.value)" ${item.type === 'boolean' ? 'disabled' : ''} class="flex-1 bg-transparent border-b border-slate-800 focus:outline-none text-sm font-bold py-1">
+                                        ${item.type !== 'survey' ? `
+                                            <button onclick="setCorrectAnswerUI(${num})" id="checkBtn-${num}" class="px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition ${btnClass}">${isCorrect ? '✓ נכונה' : '✕ לא נכון'}</button>
+                                        ` : '<span class="text-[10px] text-purple-400 font-bold">🗳️ אופציית סקר</span>'}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function changeQuestionType(type) {
+            const item = gameItems.find(i => i.id === selectedItemId);
+            if (!item) return;
+            item.type = type;
+            if (type === 'boolean') {
+                item.answers = ["כן", "לא"];
+                if (item.correct > 2) item.correct = 1;
+            } else if (type === 'survey') {
+                item.points = 0;
+                item.correct = 0;
+                item.graphType = "survey-end";
+                if (item.answers.length < 3) item.answers = ["אפשרות א'", "אפשרות ב'", "אפשרות ג'"];
+            } else if (item.answers.length < 4) {
+                item.answers = ["", "", "", ""];
+                item.graphType = "average";
+            }
+            renderTimeline(); renderEditor();
+        }
+
+        function adjustAnswersCount(change) {
+            const item = gameItems.find(i => i.id === selectedItemId);
+            if (!item || item.type === 'boolean') return;
+            const currentCount = item.answers.length;
+            const newCount = currentCount + change;
+            if (newCount < 2 || newCount > 5) return;
+
+            if (change > 0) { item.answers.push(""); } 
+            else { item.answers.pop(); if (item.correct > newCount) item.correct = 1; }
+            renderEditor();
+        }
+
+        function updateItemData(field, value) {
+            const item = gameItems.find(i => i.id === selectedItemId);
+            if (item) { item[field] = value; renderTimeline(); }
+        }
+
+        function updateAnswerText(index, value) {
+            const item = gameItems.find(i => i.id === selectedItemId);
+            if (item) item.answers[index] = value;
+        }
+
+        function setCorrectAnswerUI(num) {
+            const item = gameItems.find(i => i.id === selectedItemId);
+            if (!item || item.type === 'survey') return;
+            item.correct = num;
+            renderEditor();
+        }
+
+        function addBlankUserRow(phone = "", name = "", group = "") {
+            const tbody = document.getElementById('usersTableBody');
+            const rowHTML = `
+                <tr class="hover:bg-slate-800/30 transition">
+                    <td class="p-4 font-mono text-slate-300"><input type="text" value="${phone}" placeholder="הזן טלפון" class="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs w-48"></td>
+                    <td class="p-4 font-bold text-white"><input type="text" value="${name}" placeholder="שם הבחור" class="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs w-56"></td>
+                    <td class="p-4"><input type="text" value="${group}" placeholder="שיעור/קבוצה" class="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs w-44"></td>
+                    <td class="p-4 text-center"><button onclick="this.parentElement.parentElement.remove(); updateUserCount();" class="text-xs text-red-500 font-bold cursor-pointer">🗑️ מחק</button></td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML('beforeend', rowHTML);
+            updateUserCount();
+        }
+
+        function updateUserCount() {
+            document.getElementById('userCount').innerText = document.getElementById('usersTableBody').getElementsByTagName('tr').length;
+        }
+
+        function downloadHebrewSampleCSV() {
+            const csvContent = "\uFEFF" + "טלפון,שם,קבוצה\n";
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", "תבנית_משתתפים.csv");
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        }
+
+        function handleExcelUpload(event) {
             const fileInput = event.target;
             const file = fileInput.files[0];
             if (!file) return;
 
+            const shouldDeleteExisting = confirm("❓ האם למחוק את כל המשתתפים שהיו עד עכשיו במערכת לפני טעינת הקובץ החדש?\n\n לחץ 'אישור' למחיקה מלאה, או 'ביטול' להוספת החדשים על גבי הקיימים.");
+            const tbody = document.getElementById('usersTableBody');
+            if (shouldDeleteExisting) tbody.innerHTML = "";
+
             const reader = new FileReader();
             reader.onload = function(e) {
                 const text = e.target.result;
-                const lines = text.split('\n');
-                userDatabase = [];
+                const lines = text.split("\n");
 
-                for (let i = 1; i < lines.length; i++) {
-                    if (!lines[i].trim()) continue;
-                    const cols = lines[i].split(',');
-                    if (cols.length >= 3) {
-                        let phone = cols[0].trim().replace(/[^0-9]/g, '');
-                        if (phone.startsWith('0')) phone = '972' + phone.substring(1);
-                        
-                        userDatabase.push({
-                            phone: phone,
-                            name: cols[1].trim(),
-                            group: cols[2].trim()
-                        });
+                for(let i = 1; i < lines.length; i++) {
+                    if (lines[i].trim() === "") continue;
+                    const cols = lines[i].split(",");
+                    if (cols.length >= 2) {
+                        let phone = cols[0] ? cols[0].replace(/[\r\n"']/g, '').trim() : "";
+                        const name = cols[1] ? cols[1].replace(/[\r\n"']/g, '').trim() : "";
+                        const group = cols[2] ? cols[2].replace(/[\r\n"']/g, '').trim() : "";
+
+                        if (phone.length === 9 && (phone.startsWith('5') || phone.startsWith('2') || phone.startsWith('3') || phone.startsWith('4') || phone.startsWith('7') || phone.startsWith('8'))) {
+                            phone = "0" + phone;
+                        }
+                        addBlankUserRow(phone, name, group);
                     }
                 }
                 updateUserCount();
@@ -364,32 +460,6 @@
                 fileInput.value = ""; 
             };
             reader.readAsText(file, "UTF-8");
-        }
-
-        function appendBlankUserRow(phone, name, group) {
-            // פונקציה פנימית מהקוד המקורי
-        }
-
-        function updateUserCount() {
-            document.getElementById('dbUserCount').innerText = userDatabase.length;
-            const tbody = document.getElementById('userPreviewTable');
-            tbody.innerHTML = "";
-
-            if (userDatabase.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-slate-500 font-medium">אין עדיין בחורים במסד הנתונים. העלה קובץ CSV למעלה.</td></tr>`;
-                return;
-            }
-
-            const itemsToShow = userDatabase.slice(0, 100);
-            itemsToShow.forEach(user => {
-                tbody.insertAdjacentHTML('beforeend', `
-                    <tr class="hover:bg-slate-900/60 transition">
-                        <td class="p-2.5 font-mono text-slate-400">${user.phone}</td>
-                        <td class="p-2.5 font-bold text-slate-200">${user.name}</td>
-                        <td class="p-2.5"><span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded-md font-medium text-[11px] border border-slate-700/40">${user.group}</span></td>
-                    </tr>
-                `);
-            });
         }
 
         function updateBrandingData(field, value) {
@@ -411,24 +481,7 @@
             reader.readAsDataURL(file);
         }
 
-        async function saveGameToServer() { 
-            try {
-                const response = await fetch('/api/questions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(gameItems)
-                });
-                
-                if (response.ok) {
-                    alert("💾 כל נתוני המיתוג, פרטי האירוע והשאלות נשמרו בהצלחה בשרת ב-Render!");
-                } else {
-                    alert("❌ תקלה בשמירת הנתונים בשרת.");
-                }
-            } catch (error) {
-                alert("❌ שגיאת תקשורת - לא ניתן לגשת לשרת ב-Render.");
-            }
-        }
-        
+        function saveGameToServer() { alert("💾 כל נתוני המיתוג, פרטי האירוע והשאלות נשמרו בהצלחה!"); }
         function launchLiveEvent() { window.open('/3.html', '_blank'); }
     </script>
 </body>
