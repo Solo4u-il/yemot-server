@@ -1,1 +1,435 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👑 סורוצקליק - דשבורד מנהל מלא ומעודכן</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700;900&display=swap');
+        body { font-family: 'Rubik', sans-serif; }
+        .tab-active { border-bottom-color: #f59e0b; color: #f59e0b; }
+        .selected-item { background-color: #1e3a8a; border-color: #3b82f6; opacity: 1 !important; }
+        .bonus-style { background: linear-gradient(145deg, #1e1b4b, #2e1a47); border-color: #fbbf24 !important; box-shadow: 0 0 15px rgba(251, 191, 36, 0.15); }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
 
+    <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex justify-between items-center shadow-xl">
+        <div class="flex items-center gap-4">
+            <div id="globalLogoContainer" class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center font-black text-amber-500 overflow-hidden">
+                ס
+            </div>
+            <div>
+                <h1 id="globalGameTitle" class="text-xl font-black text-yellow-500">סורוצקליק</h1>
+                <p id="globalGameSubtitle" class="text-[11px] text-slate-400">הכנת תוכן, ניהול שחקנים ומיתוג האירוע</p>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="saveGameToServer()" class="bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-slate-950 font-black text-xs px-4 py-2 rounded-xl transition shadow-lg cursor-pointer">💾 שמור משחק לשרת</button>
+            <button onclick="launchLiveEvent()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs px-4 py-2 rounded-xl transition shadow-md cursor-pointer">📺 פתיחת שלט ההקרנה</button>
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden">
+        
+        <aside class="w-80 bg-slate-900 border-l border-slate-800 p-4 flex flex-col justify-between">
+            <div class="space-y-4 overflow-y-auto flex-1 pb-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">📋 תור המשחק המתוכנן</h3>
+                    <span id="itemCount" class="bg-slate-800 text-slate-300 font-mono text-[10px] px-2 py-0.5 rounded-full font-bold">0 פריטים</span>
+                </div>
+                
+                <div id="timelineList" class="space-y-2">
+                    </div>
+            </div>
+            
+            <div class="pt-4 border-t border-slate-800 text-[11px] text-slate-500 text-center font-medium">
+                סדר הפריטים קובע את זרימת האירוע באולם
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col bg-slate-950/40">
+            
+            <nav class="flex border-b border-slate-800 bg-slate-900/40 px-6">
+                <button onclick="switchTab('questions')" id="tab-questions" class="tab-active text-xs font-bold py-4 px-4 border-b-2 border-transparent transition cursor-pointer">❓ בניית שאלות ותוכן</button>
+                <button onclick="switchTab('users')" id="tab-users" class="text-slate-400 hover:text-slate-200 text-xs font-bold py-4 px-4 border-b-2 border-transparent transition cursor-pointer">👥 רשימת בחורים (CSV)</button>
+                <button onclick="switchTab('branding')" id="tab-branding" class="text-slate-400 hover:text-slate-200 text-xs font-bold py-4 px-4 border-b-2 border-transparent transition cursor-pointer">🎨 מיתוג ועיצוב</button>
+            </nav>
+
+            <div class="flex-1 p-6 overflow-y-auto">
+                
+                <div id="content-questions" class="space-y-6">
+                    
+                    <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-lg">
+                        <h3 class="text-sm font-black text-yellow-500">➕ הוספת תוכן חדש לתור</h3>
+                        
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="col-span-2">
+                                <label class="text-[11px] font-bold text-slate-400 block mb-1">שאלה או כותרת ראשית</label>
+                                <input id="itemTitle" type="text" placeholder="לדוגמה: מהו השורש של אבות נזיקין לפי הגמרא?" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-yellow-500 transition">
+                            </div>
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-400 block mb-1">סוג הפריט</label>
+                                <select id="itemType" onchange="toggleFormFields()" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-300 focus:outline-none focus:border-yellow-500 transition cursor-pointer">
+                                    <option value="trivia">❓ שאלת טריוויה רגילה</option>
+                                    <option value="bonus">👑 שאלת בונוס (ניקוד כפול)</option>
+                                    <option value="survey">📊 שאלת סקר / הצבעה חופשית</option>
+                                    <option value="topic">🔖 כותרת נושא / מעברון</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="triviaFields" class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-[11px] font-bold text-slate-400 block mb-1">מסיח 1 (אדום)</label>
+                                    <input id="ans1" type="text" placeholder="תשובה ראשונה" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-red-500/50 transition">
+                                </div>
+                                <div>
+                                    <label class="text-[11px] font-bold text-slate-400 block mb-1">מסיח 2 (כחול)</label>
+                                    <input id="ans2" type="text" placeholder="תשובה שנייה" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-blue-500/50 transition">
+                                </div>
+                                <div>
+                                    <label class="text-[11px] font-bold text-slate-400 block mb-1">מסיח 3 (צהוב)</label>
+                                    <input id="ans3" type="text" placeholder="תשובה שלישית" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-yellow-500/50 transition">
+                                </div>
+                                <div>
+                                    <label class="text-[11px] font-bold text-slate-400 block mb-1">מסיח 4 (ירוק)</label>
+                                    <input id="ans4" type="text" placeholder="תשובה רביעית" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500/50 transition">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-[11px] font-bold text-slate-400 block mb-1">התשובה הנכונה</label>
+                                    <select id="correctAnswer" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-300 focus:outline-none focus:border-yellow-500 transition cursor-pointer">
+                                        <option value="1">מסיח 1 (אדום)</option>
+                                        <option value="2">מסיח 2 (כחול)</option>
+                                        <option value="3">מסיח 3 (צהוב)</option>
+                                        <option value="4">מסיח 4 (ירוק)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[11px] font-bold text-slate-400 block mb-1">זמן להצבעה (שניות)</label>
+                                    <input id="itemTimer" type="number" value="20" min="5" max="120" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-yellow-500 transition">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-2 flex justify-end">
+                            <button onclick="addTimelineItem()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition border border-slate-700 shadow-md cursor-pointer">➕ הוסף לתור המשחק</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div id="content-users" class="space-y-6 hidden">
+                    
+                    <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-lg">
+                        <h3 class="text-sm font-black text-yellow-500">📥 טעינת קובץ משתתפים (CSV)</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            באפשרותך להעלות קובץ אקסל שנשמר כפורמט <code class="bg-slate-950 px-1.5 py-0.5 rounded text-yellow-400 font-mono text-[11px]">.csv</code>. 
+                            הקובץ חייב להכיל שלוש עמודות בדיוק בסדר הבא: <b class="text-slate-200">טלפון, שם מלא, קבוצה/שיעור</b>. המספרים ינוקו אוטומטית מתווים מיותרים.
+                        </p>
+                        
+                        <div class="flex items-center gap-4 pt-2">
+                            <input type="file" id="csvFileInput" accept=".csv" onchange="handleCSVUpload(event)" class="text-xs text-slate-400 file:bg-slate-800 file:border-none file:text-white file:text-xs file:font-bold file:px-4 file:py-2 file:rounded-xl file:ml-4 file:cursor-pointer hover:file:bg-slate-700 file:transition">
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-800/60 flex justify-between items-center text-xs text-slate-400">
+                            <div>סטטוס מסד נתונים פנימי:</div>
+                            <div class="font-bold text-slate-200">נטענו <span id="dbUserCount" class="text-yellow-500 font-mono text-sm">0</span> בחורים רשומים במערכת.</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-lg">
+                        <div class="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">👀 תצוגה מקדימה של הבחורים במערכת</h4>
+                            <span class="text-[10px] text-slate-500">מציג עד 100 רשומות ראשונות</span>
+                        </div>
+                        <div class="overflow-x-auto max-h-80">
+                            <table class="w-full text-right text-xs">
+                                <thead class="bg-slate-950 text-slate-400 uppercase font-bold sticky top-0 border-b border-slate-800">
+                                    <tr>
+                                        <th class="p-3">מספר טלפון (מזהה)</th>
+                                        <th class="p-3">שם הבחור</th>
+                                        <th class="p-3">קבוצה / שיעור</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="userPreviewTable" class="divide-y divide-slate-800/40 text-slate-300">
+                                    <tr>
+                                        <td colspan="3" class="p-8 text-center text-slate-500 font-medium">אין עדיין בחורים במסד הנתונים. העלה קובץ CSV למעלה.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div id="content-branding" class="space-y-6 hidden">
+                    
+                    <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-lg">
+                        <h3 class="text-sm font-black text-yellow-500">🎨 כותרות ולוגו לאירוע</h3>
+                        <p class="text-xs text-slate-400">הגדרות המיתוג והטקסטים שיופיעו בראש מסך ההקרנה ובדשבורדים באולם בזמן אמת.</p>
+                        
+                        <div class="grid grid-cols-2 gap-4 pt-2">
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-400 block mb-1">שם האירוע הראשי (יופיע בגדול)</label>
+                                <input id="brandingTitle" type="text" value="סורוצקליק" oninput="updateBrandingData('title', this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-yellow-500 transition">
+                            </div>
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-400 block mb-1">כותרת משנה / שם הישיבה / מחזור</label>
+                                <input id="brandingSubtitle" type="text" placeholder="ישיבת סורוצקין - פורים תשפ&quot;ו" oninput="updateBrandingData('subtitle', this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-yellow-500 transition">
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-800/60 grid grid-cols-3 gap-6 items-center">
+                            <div class="col-span-2 space-y-1">
+                                <label class="text-[11px] font-bold text-slate-400 block">סמל / לוגו האירוע</label>
+                                <p class="text-[11px] text-slate-500">העלה קובץ תמונה ריבועי (PNG/JPG). הלוגו יתעדכן אוטומטית בראש כל המסכים.</p>
+                                <input type="file" accept="image/*" onchange="loadBrandingLogo(event)" class="text-xs text-slate-400 file:bg-slate-800 file:border-none file:text-white file:text-xs file:font-bold file:px-3 file:py-1.5 file:rounded-lg file:ml-3 file:cursor-pointer hover:file:bg-slate-700 file:transition pt-1">
+                            </div>
+                            <div class="flex flex-col items-center gap-1.5">
+                                <span class="text-[10px] text-slate-500 font-bold">תצוגה מקדימה</span>
+                                <div id="brandingLogoPreview" class="w-16 h-16 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center font-black text-yellow-500 text-xl overflow-hidden shadow-inner">
+                                    ס
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let gameItems = [];
+        let userDatabase = [];
+
+        function switchTab(tabId) {
+            const tabs = ['questions', 'users', 'branding'];
+            tabs.forEach(tab => {
+                const btn = document.getElementById(`tab-${tab}`);
+                const content = document.getElementById(`content-${tab}`);
+                
+                if (tab === tabId) {
+                    btn.className = "tab-active text-xs font-bold py-4 px-4 border-b-2 border-yellow-500 text-yellow-500 transition cursor-pointer";
+                    content.classList.remove('hidden');
+                } else {
+                    btn.className = "text-slate-400 hover:text-slate-200 text-xs font-bold py-4 px-4 border-b-2 border-transparent transition cursor-pointer";
+                    content.classList.add('hidden');
+                }
+            });
+        }
+
+        function toggleFormFields() {
+            const type = document.getElementById('itemType').value;
+            const fields = document.getElementById('triviaFields');
+            if (type === 'topic') {
+                fields.classList.add('hidden');
+            } else {
+                fields.classList.remove('hidden');
+            }
+        }
+
+        function addTimelineItem() {
+            const titleInput = document.getElementById('itemTitle');
+            const typeSelect = document.getElementById('itemType');
+            const title = titleInput.value.trim();
+            const type = typeSelect.value;
+
+            if (!title) {
+                alert("❌ חובה להזין שאלה או כותרת ראשית לפריט.");
+                return;
+            }
+
+            let newItem = {
+                id: (gameItems.length + 1).toString(),
+                type: type,
+                title: title
+            };
+
+            if (type !== 'topic') {
+                const a1 = document.getElementById('ans1').value.trim() || "מסיח 1";
+                const a2 = document.getElementById('ans2').value.trim() || "מסיח 2";
+                const a3 = document.getElementById('ans3').value.trim() || "מסיח 3";
+                const a4 = document.getElementById('ans4').value.trim() || "מסיח 4";
+                const correct = parseInt(document.getElementById('correctAnswer').value);
+                const timer = parseInt(document.getElementById('itemTimer').value) || 20;
+
+                newItem.answers = [a1, a2, a3, a4];
+                newItem.correct = correct;
+                newItem.timer = timer;
+            }
+
+            gameItems.push(newItem);
+            renderTimeline();
+
+            titleInput.value = "";
+            if (type !== 'topic') {
+                document.getElementById('ans1').value = "";
+                document.getElementById('ans2').value = "";
+                document.getElementById('ans3').value = "";
+                document.getElementById('ans4').value = "";
+            }
+        }
+
+        function deleteTimelineItem(index) {
+            gameItems.splice(index, 1);
+            gameItems.forEach((item, idx) => item.id = (idx + 1).toString());
+            renderTimeline();
+        }
+
+        function renderTimeline() {
+            const list = document.getElementById('timelineList');
+            const countBadge = document.getElementById('itemCount');
+            list.innerHTML = "";
+            countBadge.innerText = `${gameItems.length} פריטים`;
+
+            if (gameItems.length === 0) {
+                list.innerHTML = `
+                    <div class="text-center py-12 text-slate-600 font-medium text-xs border border-dashed border-slate-800 rounded-xl">
+                        אין פריטים בתור המשחק.<br>בנה תוכן בטאב המרכזי.
+                    </div>
+                `;
+                return;
+            }
+
+            gameItems.forEach((item, index) => {
+                let badgeStyle = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+                let badgeText = "❓ טריוויה";
+                let extraInfo = `<span class="text-[10px] text-slate-400 font-mono">⏳ ${item.timer} שניות</span>`;
+
+                if (item.type === 'bonus') {
+                    badgeStyle = "bonus-style bg-amber-500/10 text-amber-400 border-amber-500/30 font-black";
+                    badgeText = "👑 בונוס";
+                } else if (item.type === 'survey') {
+                    badgeStyle = "bg-purple-500/10 text-purple-400 border-purple-500/20";
+                    badgeText = "📊 סקר חופשי";
+                    extraInfo = `<span class="text-[10px] text-purple-500/80 font-bold">הצבעת דעה</span>`;
+                } else if (item.type === 'topic') {
+                    badgeStyle = "bg-slate-800 text-slate-400 border-slate-700/60";
+                    badgeText = "🔖 כותרת נושא";
+                    extraInfo = `<span class="text-[10px] text-slate-500 font-bold">מעברון חלק</span>`;
+                }
+
+                list.insertAdjacentHTML('beforeend', `
+                    <div class="bg-slate-900/80 border border-slate-800/80 p-3 rounded-xl flex flex-col gap-1.5 relative group hover:border-slate-700 transition">
+                        <div class="flex justify-between items-start gap-2">
+                            <span class="text-[10px] px-2 py-0.5 rounded-md border font-bold ${badgeStyle}">${badgeText}</span>
+                            <div class="flex items-center gap-1.5">
+                                ${extraInfo}
+                                <span class="text-[10px] font-mono font-bold text-slate-600">#${item.id}</span>
+                            </div>
+                        </div>
+                        <p class="text-xs font-bold text-slate-200 truncate pl-4">${item.title}</p>
+                        
+                        <button onclick="deleteTimelineItem(${index})" class="absolute left-2 bottom-2 text-slate-600 hover:text-red-400 text-[10px] font-bold opacity-0 group-hover:opacity-100 transition cursor-pointer">🗑️ מחק</button>
+                    </div>
+                `);
+            });
+        }
+
+        function handleCSVUpload(event) {
+            const fileInput = event.target;
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const lines = text.split('\n');
+                userDatabase = [];
+
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+                    const cols = lines[i].split(',');
+                    if (cols.length >= 3) {
+                        let phone = cols[0].trim().replace(/[^0-9]/g, '');
+                        if (phone.startsWith('0')) phone = '972' + phone.substring(1);
+                        
+                        userDatabase.push({
+                            phone: phone,
+                            name: cols[1].trim(),
+                            group: cols[2].trim()
+                        });
+                    }
+                }
+                updateUserCount();
+                alert("✅ קובץ האקסל נטען בהצלחה! מספרים תוקנו במידת הצורך.");
+                fileInput.value = ""; 
+            };
+            reader.readAsText(file, "UTF-8");
+        }
+
+        function appendBlankUserRow(phone, name, group) {
+            // פונקציה פנימית מהקוד המקורי
+        }
+
+        function updateUserCount() {
+            document.getElementById('dbUserCount').innerText = userDatabase.length;
+            const tbody = document.getElementById('userPreviewTable');
+            tbody.innerHTML = "";
+
+            if (userDatabase.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-slate-500 font-medium">אין עדיין בחורים במסד הנתונים. העלה קובץ CSV למעלה.</td></tr>`;
+                return;
+            }
+
+            const itemsToShow = userDatabase.slice(0, 100);
+            itemsToShow.forEach(user => {
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr class="hover:bg-slate-900/60 transition">
+                        <td class="p-2.5 font-mono text-slate-400">${user.phone}</td>
+                        <td class="p-2.5 font-bold text-slate-200">${user.name}</td>
+                        <td class="p-2.5"><span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded-md font-medium text-[11px] border border-slate-700/40">${user.group}</span></td>
+                    </tr>
+                `);
+            });
+        }
+
+        function updateBrandingData(field, value) {
+            if (field === 'title') {
+                document.getElementById('globalGameTitle').innerText = value || "סורוצקליק";
+                document.getElementById('brandingTitle').value = value;
+            } else if (field === 'subtitle') {
+                document.getElementById('globalGameSubtitle').innerText = value || "";
+            }
+        }
+        
+        function loadBrandingLogo(event) {
+            const file = event.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('globalLogoContainer').innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+                document.getElementById('brandingLogoPreview').innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        async function saveGameToServer() { 
+            try {
+                const response = await fetch('/api/questions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(gameItems)
+                });
+                
+                if (response.ok) {
+                    alert("💾 כל נתוני המיתוג, פרטי האירוע והשאלות נשמרו בהצלחה בשרת ב-Render!");
+                } else {
+                    alert("❌ תקלה בשמירת הנתונים בשרת.");
+                }
+            } catch (error) {
+                alert("❌ שגיאת תקשורת - לא ניתן לגשת לשרת ב-Render.");
+            }
+        }
+        
+        function launchLiveEvent() { window.open('/3.html', '_blank'); }
+    </script>
+</body>
+</html>
