@@ -1,9 +1,18 @@
 const express = require('express');
-const cors = require('cors');
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+
+// 🌟 תוספת: מאפשר גישה לדפדפן (CORS) באופן ידני ללא צורך בהתקנת חבילות נוספות!
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    next();
+});
 
 // 💾 משתני הזיכרון של השרת
 let currentQuestionId = 1;     // מספר השאלה הפעילה כרגע
