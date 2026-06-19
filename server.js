@@ -3,14 +3,15 @@ const app = express();
 
 app.use(express.json());
 
-// 🌟 טיפול קפדני ומלא ב-CORS ללא ספריות חיצוניות - פותר שגיאות אבטחה בדפדפן!
+// 🌟 מעקף CORS אגרסיבי ומעשי - מאפשר גישה מכל דפדפן, מכל מחשב ומכל פרוטוקול (כולל קבצים מקומיים!)
 app.use((req, res, next) => {
+    // מאפשרים גישה לכל מקור חיצוני ללא הגבלת אבטחה
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE");
+    // תמיכה בכל כותרת שהדפדפן עשוי לשלוח
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-    res.header("Access-Control-Allow-Credentials", "true");
     
-    // אם הדפדפן שולח בקשת בדיקה מקדימה (Preflight / OPTIONS) נחזיר לו מיד 200 OK
+    // מונעים את השגיאה הנפוצה של Credentials מול כוכבית (*) על ידי אי-שליחת הכותרת הזו אלא אם נדרש
     if (req.method === 'OPTIONS') {
         return res.sendStatus(200);
     }
