@@ -3,11 +3,14 @@ const app = express();
 
 app.use(express.json());
 
-// 🌟 תוספת: מאפשר גישה לדפדפן (CORS) באופן ידני ללא צורך בהתקנת חבילות נוספות!
+// 🌟 טיפול קפדני ומלא ב-CORS ללא ספריות חיצוניות - פותר שגיאות אבטחה בדפדפן!
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    res.header("Access-Control-Allow-Credentials", "true");
+    
+    // אם הדפדפן שולח בקשת בדיקה מקדימה (Preflight / OPTIONS) נחזיר לו מיד 200 OK
     if (req.method === 'OPTIONS') {
         return res.sendStatus(200);
     }
