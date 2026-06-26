@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👑 סורוצקליק - דשבורד מנהל מלא ומעודכן</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rubik:wght=300;400;500;700;900&display=swap');
+        body { font-family: 'Rubik', sans-serif; }
+        .tab-active { border-bottom-color: #f59e0b; color: #f59e0b; }
+        .selected-item { background-color: #1e3a8a; border-color: #3b82f6; opacity: 1 !important; }
+        .bonus-style { background: linear-gradient(145deg, #1e1b4b, #2e1a47); border-color: #fbbf24 !important; box-shadow: 0 0 15px rgba(251, 191, 36, 0.15); }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+
+    <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex flex-col lg:flex-row gap-4 justify-between items-center shadow-xl z-20">
+        <div class="flex items-center gap-4">
+            <div id="globalLogoContainer" class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-2xl overflow-hidden">
+                👑
+            </div>
+            <div>
+                <h1 id="globalGameTitle" class="text-2xl font-black bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent tracking-wide">סורוצקליק - SorotzClick</h1>
+                <p id="globalGameSubtitle" class="text-xs text-slate-400 font-medium">מערכת שעשועוני טריוויה וקליקרים בלייב - עטרת שלמה</p>
+            </div>
+        </div>
+        
+        <!-- כתובת השרת (מקומי או Render) -->
+        <div class="flex items-center gap-2 bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-xl">
+            <span class="text-xs text-slate-400 font-bold">🌐 כתובת שרת:</span>
+            <input type="text" id="serverUrlInput" placeholder="http://localhost:3000" oninput="saveServerUrl(this.value)" class="bg-transparent text-xs text-amber-400 font-mono focus:outline-none w-64">
+        </div>
+
+        <nav class="flex gap-6 h-full items-center">
+            <button onclick="switchTab('questions-tab')" id="btn-questions-tab" class="tab-active border-b-2 border-transparent pb-1 font-bold text-sm transition cursor-pointer">📝 עריכת שאלות וסדר יום</button>
+            <button onclick="switchTab('users-tab')" id="btn-users-tab" class="border-b-2 border-transparent pb-1 font-bold text-sm text-slate-400 hover:text-slate-200 transition cursor-pointer">👥 ניהול משתתפים וקבוצות</button>
+            <button onclick="switchTab('branding-tab')" id="btn-branding-tab" class="border-b-2 border-transparent pb-1 font-bold text-sm text-slate-400 hover:text-slate-200 transition cursor-pointer">🎨 מיתוג ופרטי אירוע</button>
+        </nav>
+
+        <div class="flex items-center gap-4">
+            <button onclick="saveGameToServer()" class="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black px-6 py-2 rounded-xl transition shadow-lg cursor-pointer text-sm">💾 שמירת משחק בשרת</button>
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden">
+
+        <div id="questions-tab" class="flex-1 flex overflow-hidden">
+            
+            <aside class="w-96 bg-slate-900 border-l border-slate-800 flex flex-col justify-between">
+                <div class="p-4 flex-1 overflow-y-auto space-y-4">
+                    <div class="space-y-1">
+                        <h3 class="font-bold text-slate-300 text-xs uppercase tracking-wider">📚 מבנה המשחק וסדר יום</h3>
+                        <p class="text-[10px] text-slate-500">שנה סדר באמצעות החצים ובחר פריט לעריכה</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="createNewItem('trivia')" class="bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 text-xs font-bold py-2 px-2 rounded-xl border border-blue-800/60 transition cursor-pointer text-center">
+                            ➕ הוסף שאלה
+                        </button>
+                        <button onclick="createNewItem('topic')" class="bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 text-xs font-bold py-2 px-2 rounded-xl border border-purple-800/60 transition cursor-pointer text-center">
+                            ➕ כותרת נושא
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-2" id="timelineList"></div>
+                </div>
+
+                <div class="p-4 border-t border-slate-800 bg-slate-950/30">
+                    <button onclick="showLeaderboardLive()" class="w-full mb-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-center transition shadow-lg text-sm cursor-pointer">
+                        🏆 הצג מובילים במקרן
+                    </button>
+                    <button onclick="launchLiveEvent()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-center transition shadow-lg text-sm cursor-pointer">
+                        🚀 פתח מסך מקרן אולפני (index.html)
+                    </button>
+                </div>
+            </aside>
+
+            <main id="editorZone" class="flex-1 p-6 md:p-8 overflow-y-auto space-y-6">
+            </main>
+        </div>
+
+
+        <div id="users-tab" class="hidden flex-1 p-6 md:p-8 overflow-y-auto space-y-6">
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-lg">
+                <div>
+                    <h3 class="text-lg font-bold text-white">📋 העלאת בחורים וחלוקה לקבוצות (שיעורים)</h3>
+                    <p class="text-xs text-slate-400 mt-1">המערכת מוסיפה אוטומטית 0 למספרים שהורדו מאקסל בצורה פגומה. ניתן להעלות קבצים מרובים ברצף.</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="downloadHebrewSampleCSV()" class="bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 text-xs font-bold py-2.5 px-4 rounded-xl transition cursor-pointer">
+                        📥 הורד אקסל דוגמה (כותרות בלבד)
+                    </button>
+                    <label class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition cursor-pointer shadow-md shadow-blue-600/10 relative">
+                        📤 העלה קובץ משתתפים (.csv)
+                        <input type="file" id="excelUpload" accept=".csv" onchange="handleExcelUpload(event)" class="hidden">
+                    </label>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+                <div class="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center">
+                    <span class="text-xs font-bold text-slate-400 uppercase">רשימת משתתפים מוגדרים במערכת (<span id="userCount">0</span>)</span>
+                    <button onclick="addBlankUserRow('', '', '')" class="text-xs bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 font-bold py-1.5 px-3 rounded-lg transition cursor-pointer">+ הוסף משתתף ידנית</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right border-collapse">
+                        <thead>
+                            <tr class="bg-slate-950/60 text-slate-400 text-xs font-bold border-b border-slate-800">
+                                <th class="p-4">מספר טלפון</th>
+                                <th class="p-4">שם הבחור (יוצג באתר ובמקרן)</th>
+                                <th class="p-4">שיוך לקבוצה / שיעור</th>
+                                <th class="p-4 text-center">פעולות</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody" class="text-sm divide-y divide-slate-800/60"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="branding-tab" class="hidden flex-1 p-6 md:p-8 overflow-y-auto space-y-6">
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-6 max-w-2xl shadow-xl">
+                <div>
+                    <h3 class="text-lg font-bold text-white">🎨 עיצוב ומיתוג אישי לאירוע</h3>
+                    <p class="text-xs text-slate-400">הגדר את כותרת, תת-כותרת ופרטי המשחק שיופיעו במסכי ההקרנה ובדשבורדים</p>
+                </div>
+                <hr class="border-slate-800">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-400 uppercase">📝 כותרת המשחק הרשמית</label>
+                        <input type="text" id="brandingTitle" value="סורוצקליק - SorotzClick" oninput="updateBrandingData('title', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-yellow-400 font-bold focus:outline-none">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-400 uppercase">🏫 שם המוסדות / הישיבה</label>
+                        <input type="text" id="brandingSubtitle" value="ישיבת עטרת שלמה" oninput="updateBrandingData('subtitle', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-400 uppercase">👋 הודעת פתיחה וברוכים הבאים למשתתפים</label>
+                    <input type="text" id="brandingWelcome" value="ברוכים הבאים לשעשועון הטריוויה הראשי! הכינו את המכשירים..." oninput="updateBrandingData('welcome', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-300 focus:outline-none">
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-400 uppercase">📷 לוגו הישיבה / המוסדות (תמונה משלך)</label>
+                    <div class="flex items-center gap-4">
+                        <div id="brandingLogoPreview" class="w-16 h-16 rounded-xl bg-slate-950 border border-slate-700 flex items-center justify-center text-3xl overflow-hidden">👑</div>
+                        <label class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-2 px-4 rounded-xl border border-slate-700 cursor-pointer transition">
+                            העלה קובץ תמונה
+                            <input type="file" accept="image/*" onchange="loadBrandingLogo(event)" class="hidden">
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // בנק השאלות המקורי
+        let gameItems = [
+            { id: "item-1", type: "topic", title: "נושא: בקיאות במסכת בבא קמא" },
+            { id: "item-2", type: "trivia", title: "מהי האות הראשונה הפותחת את דברי הגמרא במסכת בבא קמא?", timer: 15, points: 100, graphType: "average", answers: ["אות מ'", "אות ב'", "אות א'", "אות ח'"], correct: 1 },
+            { id: "item-3", type: "survey", title: "איזה סוג סוגיה הכי אהבתם ללמוד בזמן האחרון?", timer: 20, points: 0, graphType: "survey-end", answers: ["סוגיית מועד", "סוגיית נזיקין", "סוגיית קדשים"], correct: 0 },
+            { id: "item-4", type: "bonus", title: "שאלת המיליון של ראש הישיבה שליט\"א!", timer: 30, points: 500, graphType: "average", answers: ["אפשרות א'", "אפשרות ב'", "אפשרות ג'"], correct: 1 }
+        ];
+        
+        let selectedItemId = "item-2";
+        let brandingData = {
+            title: "סורוצקליק - SorotzClick",
+            subtitle: "מערכת שעשועוני טריוויה וקליקרים בלייב - עטרת שלמה",
+            welcome: "ברוכים הבאים לשעשועון הטריוויה הראשי! הכינו את המכשירים...",
+            logo: "אנימציית לוגו.png"
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // טעינת כתובת השרת מ-localStorage
+            const savedUrl = localStorage.getItem('render_server_url') || "http://localhost:3000";
+            document.getElementById('serverUrlInput').value = savedUrl;
+
+            renderTimeline();
+            renderEditor();
+            updateUserCount();
+            addBlankUserRow("0521234567", "חיים זילברשטיין", "שיעור א'");
+        });
+
+        function saveServerUrl(val) {
+            localStorage.setItem('render_server_url', val.trim());
+        }
+
+        // פונקציה חכמה שמנקה את כתובת השרת ומכינה אותה לקריאות (מונעת שגיאות נפוצות של המשתמש)
+        function getCleanServerUrl() {
+            let url = document.getElementById('serverUrlInput').value.trim();
+            if (!url) return "";
+            
+            // הוספת https אם המשתמש שכח
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+            
+            // הסרת סלאש מיותר בסוף
+            if (url.endsWith('/')) {
+                url = url.slice(0, -1);
+            }
+            return url;
+        }
+
+        function switchTab(tabId) {
+            document.getElementById('questions-tab').classList.add('hidden');
+            document.getElementById('users-tab').classList.add('hidden');
+            document.getElementById('branding-tab').classList.add('hidden');
+            document.getElementById('btn-questions-tab').classList.remove('tab-active');
+            document.getElementById('btn-users-tab').classList.remove('tab-active');
+            document.getElementById('btn-branding-tab').classList.remove('tab-active');
+            
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById('btn-' + tabId).classList.add('tab-active');
+        }
+
+        function renderTimeline() {
+            const container = document.getElementById('timelineList');
+            container.innerHTML = "";
+
+            let currentTriviaIndex = 0; // מונה שמחשב את מספר השאלה הסידורי האמיתי לטלפונים (מדלג על כותרות נושא)
+
+            gameItems.forEach((item, index) => {
+                let html = "";
+                const displayIndex = index + 1;
+                const isSelected = item.id === selectedItemId ? "selected-item" : "";
+                const isBonus = item.type === "bonus" ? "border-amber-500/60 bg-amber-950/10 shadow-md shadow-amber-500/5" : "";
+                const typeLabels = { trivia: "טריוויה", bonus: "👑 בונוס", image: "🖼️ תמונה", boolean: "⚖️ כן/לא", survey: "📊 סקר" };
+
+                if (item.type === "topic") {
+                    html = `
+                        <div onclick="selectItem('${item.id}')" class="${isSelected} bg-purple-950/20 border-purple-900/60 p-2.5 rounded-xl border flex flex-col gap-2 cursor-pointer hover:opacity-100 transition">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2 min-w-0 text-purple-300">
+                                    <span>🔖</span>
+                                    <p class="text-xs font-black truncate">${item.title || 'כותרת נושא ריקה...'}</p>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <button onclick="event.stopPropagation(); moveItem(${index}, -1)" class="text-slate-500 hover:text-slate-200 text-[10px]">▲</button>
+                                    <button onclick="event.stopPropagation(); moveItem(${index}, 1)" class="text-slate-500 hover:text-slate-200 text-[10px]">▼</button>
+                                    <button onclick="event.stopPropagation(); deleteItem('${item.id}')" class="hover:text-red-400 text-xs text-slate-500 mr-1">🗑️</button>
+                                </div>
+                            </div>
+                            <button onclick="event.stopPropagation(); launchQuestionLive(${displayIndex}, 'topic')" class="w-full bg-purple-600/20 hover:bg-purple-600/40 text-purple-300 border border-purple-500/30 text-[10px] font-bold py-1 px-2 rounded-lg transition text-center cursor-pointer">
+                                🎬 הצג נושא במקרן
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    currentTriviaIndex++; // נקדם את מספר השאלה הטלפונית האמיתית (למשל 1, 2, 3...)
+                    const thisQuestionNumberInServer = currentTriviaIndex;
+
+                    html = `
+                        <div onclick="selectItem('${item.id}')" class="${isSelected} ${isBonus} bg-slate-900/40 border-slate-800 p-3 rounded-xl border flex flex-col gap-2 cursor-pointer transition">
+                            <div class="flex items-start justify-between w-full">
+                                <div class="flex items-start gap-2 min-w-0">
+                                    <span class="bg-slate-800 text-slate-300 text-xs font-mono font-black w-5 h-5 rounded-md flex items-center justify-center mt-0.5">${thisQuestionNumberInServer}</span>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs font-bold text-white truncate">${item.title || 'שאלה ריקה...'}</p>
+                                        <span class="text-[10px] text-blue-300">${typeLabels[item.type] || 'שאלה'} | ⏱️ ${item.timer}ש' | ${item.type === 'survey' ? 'ללא ניקוד' : `💎 ${item.points}נ'`}</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-1 text-slate-500 mr-1">
+                                    <button onclick="event.stopPropagation(); moveItem(${index}, -1)" class="hover:text-slate-200 text-[10px]">▲</button>
+                                    <button onclick="event.stopPropagation(); moveItem(${index}, 1)" class="hover:text-slate-200 text-[10px]">▼</button>
+                                    <button onclick="event.stopPropagation(); deleteItem('${item.id}')" class="hover:text-red-400 text-xs">🗑️</button>
+                                </div>
+                            </div>
+                            <!-- כפתור הפעלה חיה מותאם בדיוק למספר השאלה האמיתי בשרת קבלת ההקשות -->
+                            <button onclick="event.stopPropagation(); launchQuestionLive(${displayIndex}, '${item.type}')" class="w-full bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold py-1 px-2 rounded-lg transition text-center cursor-pointer">
+                                🚀 הפעל שאלה זו כעת באולם (לייב)
+                            </button>
+                        </div>
+                    `;
+                }
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        // הפעלת שאלה ספציפית בשרת קבלת ההקשות (מאפס את ההצבעות הקודמות)
+        async function launchQuestionLive(qNum, itemType = 'trivia') {
+            const serverUrl = getCleanServerUrl();
+            if (!serverUrl) {
+                alert("❌ אנא הגדר תחילה את כתובת השרת בראש הדף!");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${serverUrl}/set-question?id=${qNum}`, { method: 'POST' });
+                if (response.ok) {
+                    const label = itemType === 'topic' ? 'נושא' : itemType === 'survey' ? 'סקר' : 'שאלה';
+                    alert(`🚀 ${label} מספר ${qNum} הופעל בלייב! המקרן יתעדכן מיד.`);
+                } else {
+                    alert("⚠️ שגיאה בהפעלת השאלה בשרת. וודא שקוד השרת המעודכן רץ ב-Render.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("❌ לא ניתן להתחבר לשרת. בדוק את הכתובת בראש הדף או שהשרת עדיין נטען.");
+            }
+        }
+
+        function moveItem(index, direction) {
+            const targetIndex = index + direction;
+            if (targetIndex < 0 || targetIndex >= gameItems.length) return;
+            const temp = gameItems[index]; gameItems[index] = gameItems[targetIndex]; gameItems[targetIndex] = temp;
+            renderTimeline();
+        }
+
+        function selectItem(id) { selectedItemId = id; renderTimeline(); renderEditor(); }
+
+        function createNewItem(type) {
+            const newId = "item-" + Date.now();
+            if (type === "topic") {
+                gameItems.push({ id: newId, type: "topic", title: "נושא חדש..." });
+            } else {
+                gameItems.push({ id: newId, type: "trivia", title: "", timer: 15, points: 100, graphType: "average", answers: ["", "", "", ""], correct: 1 });
+            }
+            selectedItemId = newId; renderTimeline(); renderEditor();
+        }
+
+        function deleteItem(id) {
+            if(confirm("⚠️ אזהרה: האם אתה בטוח לחלוטין שברצונך למחוק פריט זה מסדר היום?")) {
+                gameItems = gameItems.filter(i => i.id !== id);
+                if (selectedItemId === id) selectedItemId = gameItems.length > 0 ? gameItems[0].id : null;
+                renderTimeline(); renderEditor();
+            }
+        }
+
+        function renderEditor() {
+            const mainZone = document.getElementById('editorZone');
+            const item = gameItems.find(i => i.id === selectedItemId);
+            if (!item) { mainZone.innerHTML = `<div class="text-center text-slate-500 py-20">אנא בחר או הוסף פריט מהתפריט הצידי.</div>`; return; }
+
+            if (item.type === "topic") {
+                mainZone.innerHTML = `
+                    <div class="bg-purple-950/10 border border-purple-900/40 p-6 rounded-2xl space-y-4">
+                        <span class="text-xs font-bold text-purple-400 block">🔖 עריכת כותרת נושא</span>
+                        <input type="text" value="${item.title}" oninput="updateItemData('title', this.value)" class="w-full bg-slate-900 border border-purple-900/60 rounded-xl px-4 py-3 text-lg text-purple-300 focus:outline-none">
+                    </div>`;
+                return;
+            }
+
+            const isBonusCard = item.type === "bonus" ? "bonus-style" : "bg-slate-900";
+
+            mainZone.innerHTML = `
+                <div class="${isBonusCard} p-6 rounded-2xl border border-slate-800 space-y-6 transition-all duration-300">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase">❓ סוג ויוקרת השאלה</h4>
+                            <select onchange="changeQuestionType(this.value)" class="w-full mt-2 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 font-bold text-sm text-purple-400 focus:outline-none">
+                                <option value="trivia" ${item.type === 'trivia' ? 'selected' : ''}>שאלת טריוויה רגילה</option>
+                                <option value="bonus" ${item.type === 'bonus' ? 'selected' : ''}>👑 שאלת בונוס (עיצוב יוקרתי)</option>
+                                <option value="image" ${item.type === 'image' ? 'selected' : ''}>🖼️ שאלת "מה בתמונה"</option>
+                                <option value="boolean" ${item.type === 'boolean' ? 'selected' : ''}>⚖️ שאלת כן / לא</option>
+                                <option value="survey" ${item.type === 'survey' ? 'selected' : ''}>📊 סקר דעת קהל (ללא ניקוד)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase">⏱️ הגבלת זמן חופשית</h4>
+                            <input type="number" value="${item.timer}" oninput="updateItemData('timer', parseInt(this.value) || 0)" class="w-full mt-2 bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 font-bold text-amber-400 text-sm text-center">
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase">💎 שווי נקודות חופשי</h4>
+                            <input type="number" value="${item.points}" ${item.type === 'survey' ? 'disabled value="0"' : ''} oninput="updateItemData('points', parseInt(this.value) || 0)" class="w-full mt-2 bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 font-bold text-blue-400 text-sm text-center disabled:opacity-30">
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase">📊 תצוגת גרף במקרן</h4>
+                            ${item.type === 'survey' ? `
+                                <div class="mt-3 text-xs text-purple-400 font-bold bg-purple-950/30 border border-purple-900/40 rounded-xl p-2 text-center">
+                                    📊 קבוע: גרף סקר ייחודי בסוף
+                                </div>
+                            ` : `
+                                <select onchange="updateItemData('graphType', this.value)" class="w-full mt-2 bg-slate-950 border border-slate-700 rounded-xl px-2 py-2 text-xs text-emerald-400 font-bold">
+                                    <option value="average" ${item.graphType === 'average' ? 'selected' : ''}>בלייב: רק מדד הצלחה (נכון/לא נכון) -> בסוף פירוט</option>
+                                    <option value="full-end" ${item.graphType === 'full-end' ? 'selected' : ''}>חשיפת הגרף המלא רק בסיום הזמן</option>
+                                </select>
+                            `}
+                        </div>
+                    </div>
+
+                    ${item.type === 'image' ? `
+                        <div class="border-2 border-dashed border-slate-700 rounded-xl p-4 bg-slate-950/50 flex flex-col items-center justify-center gap-2">
+                            <span class="text-2xl">🖼️</span>
+                            <p class="text-xs text-slate-400 font-bold">העלה את התמונה שתוצג על המקרן לאולם</p>
+                            <input type="file" accept="image/*" class="text-xs bg-slate-900 px-2 py-1 rounded-lg border border-slate-700 cursor-pointer">
+                        </div>
+                    ` : ''}
+
+                    <div class="relative">
+                        <span class="absolute top-2 right-4 text-[10px] font-bold text-slate-500 uppercase">${item.type === 'bonus' ? '👑 שאלת בונוס יוקרתית' : 'תוכן השאלה'}</span>
+                        <textarea rows="2" oninput="updateItemData('title', this.value)" class="w-full mt-2 bg-transparent text-xl font-black ${item.type === 'bonus' ? 'text-amber-400' : 'text-yellow-300'} border-b border-slate-800 focus:outline-none py-2 resize-none" placeholder="הקלד כאן את השאלה...">${item.title}</textarea>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center px-1">
+                            <h3 class="text-sm font-bold text-slate-400">👇 אפשרויות תשובות ומפתח בחירה:</h3>
+                            ${(item.type !== 'boolean') ? `
+                                <div class="flex gap-2">
+                                    <button onclick="adjustAnswersCount(-1)" class="bg-slate-950 hover:bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer text-red-400">- הסר תשובה</button>
+                                    <button onclick="adjustAnswersCount(1)" class="bg-slate-950 hover:bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer text-emerald-400">+ הוסף תשובה</button>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="answersGrid">
+                            ${item.answers.map((ansText, idx) => {
+                                const num = idx + 1;
+                                const isCorrect = item.correct === num;
+                                const boxClass = isCorrect && item.type !== 'survey' ? "border-emerald-500/50 bg-emerald-950/20 text-emerald-400 font-bold" : "border-slate-800 text-slate-100";
+                                const btnClass = isCorrect && item.type !== 'survey' ? "bg-emerald-500 text-slate-950 font-black shadow-md shadow-emerald-500/20" : "bg-slate-950 text-slate-500 border border-slate-800";
+                                const colors = ["bg-blue-600", "bg-purple-600", "bg-amber-600", "bg-emerald-600", "bg-rose-600"];
+                                
+                                return `
+                                    <div id="answerBox-${num}" class="bg-slate-900/60 p-4 rounded-xl border flex items-center gap-4 ${boxClass}">
+                                        <span class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm text-white ${colors[idx]} shadow-md">${num}</span>
+                                        <input type="text" value="${ansText}" oninput="updateAnswerText(${idx}, this.value)" ${item.type === 'boolean' ? 'disabled' : ''} class="flex-1 bg-transparent border-b border-slate-800 focus:outline-none text-sm font-bold py-1">
+                                        ${item.type !== 'survey' ? `
+                                            <button onclick="setCorrectAnswerUI(${num})" id="checkBtn-${num}" class="px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition ${btnClass}">${isCorrect ? '✓ נכונה' : '✕ לא נכון'}</button>
+                                        ` : '<span class="text-[10px] text-purple-400 font-bold">🗳️ אופציית סקר</span>'}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function changeQuestionType(type) {
+            const item = gameItems.find(i => i.id === selectedItemId);
+            if (!item) return;
+            item.type = type;
+            if (type === 'boolean') {
+                item.answers = ["כן", "לא"];
+                if (item.correct > 2) item.correct = 1;
+            } else if (type === 'survey') {
+                item.points = 0;
+                item.correct = 0;
+                item.graphType = "survey-end";
+                if (item.answers.length < 3) item.answers = ["אפשרות א'", "אפשרות ב'", "אפשרות ג'"];
+            } else if (item.answers.length < 4) {
+                item.answers = ["", "", "", ""];
+                item.graphType = "average";
+            }
+            renderTimeline(); renderEditor();
+        }
+
+        function adjustAnswersCount(change) {
+            const item = gameItems.find(i => i.id === selectedItemId);
+            if (!item || item.type === 'boolean') return;
+            const currentCount = item.answers.length;
+            const newCount = currentCount + change;
+            if (newCount < 2 || newCount > 5) return;
+
+            if (change > 0) { item.answers.push(""); } 
+            else { item.answers.pop(); if (item.correct > newCount) item.correct = 1; }
+            renderEditor();
+        }
+
+        function updateItemData(field, value) {
+            const item = gameItems.find(i => i.id === selectedItemId);
+            if (item) { item[field] = value; renderTimeline(); }
+        }
+
+        function updateAnswerText(index, value) {
+            const item = gameItems.find(i => i.id === selectedItemId);
+            if (item) item.answers[index] = value;
+        }
+
+        function setCorrectAnswerUI(num) {
+            const item = gameItems.find(i => i.id === selectedItemId);
+            if (!item || item.type === 'survey') return;
+            item.correct = num;
+            renderEditor();
+        }
+
+        // 👥 ניהול משתתפים
+        function addBlankUserRow(phone = "", name = "", group = "") {
+            const tbody = document.getElementById('usersTableBody');
+            const rowHTML = `
+                <tr class="hover:bg-slate-800/30 transition">
+                    <td class="p-4 font-mono text-slate-300"><input type="text" value="${phone}" placeholder="הזן טלפון" class="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs w-48"></td>
+                    <td class="p-4 font-bold text-white"><input type="text" value="${name}" placeholder="שם הבחור" class="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs w-56"></td>
+                    <td class="p-4"><input type="text" value="${group}" placeholder="שיעור/קבוצה" class="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs w-44"></td>
+                    <td class="p-4 text-center"><button onclick="this.parentElement.parentElement.remove(); updateUserCount();" class="text-xs text-red-500 font-bold cursor-pointer">🗑️ מחק</button></td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML('beforeend', rowHTML);
+            updateUserCount();
+        }
+
+        function updateUserCount() {
+            document.getElementById('userCount').innerText = document.getElementById('usersTableBody').getElementsByTagName('tr').length;
+        }
+
+        function collectParticipants() {
+            const rows = [...document.querySelectorAll('#usersTableBody tr')];
+            return rows.map(row => {
+                const inputs = row.querySelectorAll('input');
+                return {
+                    phone: (inputs[0]?.value || '').trim(),
+                    name: (inputs[1]?.value || '').trim(),
+                    group: (inputs[2]?.value || '').trim()
+                };
+            }).filter(user => user.phone || user.name);
+        }
+
+        function downloadHebrewSampleCSV() {
+            const csvContent = "\uFEFF" + "טלפון,שם,קבוצה\n";
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", "תבנית_משתתפים.csv");
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        }
+
+        function handleExcelUpload(event) {
+            const fileInput = event.target;
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const shouldDeleteExisting = confirm("❓ האם למחוק את כל המשתתפים שהיו עד עכשיו במערכת לפני טעינת הקובץ החדש?\n\n לחץ 'אישור' למחיקה מלאה, או 'ביטול' להוספת החדשים על גבי הקיימים.");
+            const tbody = document.getElementById('usersTableBody');
+            if (shouldDeleteExisting) tbody.innerHTML = "";
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const lines = text.split("\n");
+
+                for(let i = 1; i < lines.length; i++) {
+                    if (lines[i].trim() === "") continue;
+                    const cols = lines[i].split(",");
+                    if (cols.length >= 2) {
+                        let phone = cols[0] ? cols[0].replace(/[\r\n"']/g, '').trim() : "";
+                        const name = cols[1] ? cols[1].replace(/[\r\n"']/g, '').trim() : "";
+                        const group = cols[2] ? cols[2].replace(/[\r\n"']/g, '').trim() : "";
+
+                        if (phone.length === 9 && (phone.startsWith('5') || phone.startsWith('2') || phone.startsWith('3') || phone.startsWith('4') || phone.startsWith('7') || phone.startsWith('8'))) {
+                            phone = "0" + phone;
+                        }
+                        addBlankUserRow(phone, name, group);
+                    }
+                }
+                updateUserCount();
+                alert("✅ קובץ האקסל נטען בהצלחה! מספרים תוקנו במידת הצורך.");
+                fileInput.value = ""; 
+            };
+            reader.readAsText(file, "UTF-8");
+        }
+
+        // 🎨 מיתוג מורחב
+        function updateBrandingData(field, value) {
+            brandingData[field] = value;
+            if (field === 'title') {
+                document.getElementById('globalGameTitle').innerText = value || "סורוצקליק";
+                document.getElementById('brandingTitle').value = value;
+            } else if (field === 'subtitle') {
+                document.getElementById('globalGameSubtitle').innerText = value || "";
+            }
+        }
+        
+        function loadBrandingLogo(event) {
+            const file = event.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                brandingData.logo = e.target.result;
+                document.getElementById('globalLogoContainer').innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+                document.getElementById('brandingLogoPreview').innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function buildServerQuestions() {
+            return gameItems
+                .map((item, index) => ({
+                    id: index + 1,
+                    type: item.type || 'trivia',
+                    text: item.title || (item.type === 'topic' ? "נושא ללא כותרת" : "שאלה ללא כותרת"),
+                    answers: item.type === 'topic' ? [] : (item.answers || ["-", "-", "-", "-"]),
+                    correctIndex: item.type === 'survey' ? -1 : (parseInt(item.correct, 10) - 1),
+                    timer: item.type === 'topic' ? 0 : (item.timer || 15),
+                    points: item.type === 'survey' || item.type === 'topic' ? 0 : (parseInt(item.points, 10) || 100)
+                }));
+        }
+
+        async function saveQuestionsOneByOne(serverUrl, questions) {
+            let successCount = 0;
+
+            for (const payload of questions) {
+                const response = await fetch(`${serverUrl}/add-question`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    successCount++;
+                }
+            }
+
+            return successCount;
+        }
+
+        // שמירה וסנכרון של כל השאלות לשרת ה-Render (מדלג אוטומטית על כותרות נושא ומחשב מספרים סידוריים נכונים)
+        async function saveGameToServer() {
+            const serverUrl = getCleanServerUrl();
+            if (!serverUrl) {
+                alert("❌ אנא הגדר תחילה את כתובת השרת בראש הדף כדי לבצע שמירה!");
+                return;
+            }
+
+            const questions = buildServerQuestions();
+            const participants = collectParticipants();
+            if (questions.length === 0) {
+                alert("⚠️ אין שאלות לשמירה. הוסף לפחות שאלה אחת לפני סנכרון לשרת.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${serverUrl}/save-game`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ questions, participants, branding: brandingData })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert(`💾 ${result.questionCount || questions.length} פריטים ו-${result.participantCount || participants.length} משתתפים נשמרו וסונכרנו בהצלחה בשרת!`);
+                    return;
+                }
+
+                if (response.status === 404) {
+                    const successCount = await saveQuestionsOneByOne(serverUrl, questions);
+                    alert(`💾 ${successCount} שאלות נשמרו בשרת. מומלץ לעדכן את server.js גם ב-Render כדי לקבל ניקוי מלא של שאלות שנמחקו.`);
+                    return;
+                }
+
+                alert("⚠️ שגיאה בשמירת המשחק בשרת. וודא שקוד השרת המעודכן רץ מקומית או ב-Render.");
+            } catch (error) {
+                console.error(error);
+                alert("❌ שגיאה בהתחברות לשרת.\n\nהסיבה הנפוצה ביותר: השרת ב-Render נרדם (כי לא ניגשו אליו 15 דקות).\n\nמה לעשות? המתן כדקה לפעילות מלאה של השרת ונסה ללחוץ שוב על שמירה!");
+            }
+        }
+
+        function launchLiveEvent() {
+            const serverUrl = getCleanServerUrl() || "http://localhost:3000";
+            window.open(`${serverUrl}/index.html`, '_blank');
+        }
+
+        async function showLeaderboardLive() {
+            const serverUrl = getCleanServerUrl();
+            if (!serverUrl) {
+                alert("❌ אנא הגדר תחילה את כתובת השרת בראש הדף!");
+                return;
+            }
+
+            try {
+                await saveGameToServer();
+                const response = await fetch(`${serverUrl}/show-leaderboard`, { method: 'POST' });
+                if (response.ok) {
+                    alert("🏆 טבלת המובילים נשלחה למקרן.");
+                } else {
+                    alert("⚠️ לא הצלחתי להציג מובילים. ודא שהשרת המעודכן רץ.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("❌ לא ניתן להתחבר לשרת להצגת מובילים.");
+            }
+        }
+    </script>
+</body>
+</html>
